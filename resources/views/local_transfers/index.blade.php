@@ -92,9 +92,14 @@
                         };
                     },
                     processResults: function (data, params) {
-                        console.log(data);
                         return {
-                            results: data
+                            results: $.map(data, function (item) {
+                                return {
+                                    text: `${item.name} | ${item.manager}`,
+                                    id: item.id,
+                                    data: item
+                                };
+                            })
                         };
                     }
                 }

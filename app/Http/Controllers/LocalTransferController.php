@@ -19,10 +19,14 @@ class LocalTransferController extends Controller
     }
 
 
-    public function getNodes(Request $request){
-        $nodes = Node::where('name','like',"%$request->keyWord%")->select(['id','name','manager'])->get();
-        return response()->json($nodes,200);
+    public function getNodes(Request $request)
+    {
+        $nodes = Node::where('name', 'like', "%$request->keyWord%")
+            ->select(['id', 'name', 'manager','warehouse_id'])
+            ->get();
+        return response()->json($nodes, 200);
     }
+
     /**
      * Show the form for creating a new resource.
      *
@@ -36,7 +40,7 @@ class LocalTransferController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -47,7 +51,7 @@ class LocalTransferController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function show($id)
@@ -58,7 +62,7 @@ class LocalTransferController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
@@ -69,8 +73,8 @@ class LocalTransferController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \Illuminate\Http\Request $request
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -81,7 +85,7 @@ class LocalTransferController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
