@@ -110,20 +110,3 @@
         }
     </script>
 @endsection
-=======
-@extends('layouts.app')
-
-@section('title','Điều chuyển vật tư')
-@section('vendor_js')
-
-@endsection
-
-
-@section('content')
-@endsection
-
-
-@section('custom_js')
-
-@endsection
->>>>>>> a29c8c90d25952768401b8dc0f077304a12533af
