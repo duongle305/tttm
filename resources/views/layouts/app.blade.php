@@ -20,6 +20,7 @@
     <script type="text/javascript" src="{{ asset('assets/js/core/libraries/jquery.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/js/core/libraries/bootstrap.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/js/plugins/loaders/blockui.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('assets/js/plugins/notifications/jgrowl.min.js') }}"></script>
     <!-- /core JS files -->
 
     <!-- Theme JS files -->
@@ -101,6 +102,15 @@
 
 </div>
 <!-- /page container -->
+@if(session('message'))
+    <script>
+        $.jGrowl('{{ session('message') }}', {
+            header: 'Thông báo',
+            theme: 'bg-success'
+        });
+    </script>
+@endif
+
 @yield('custom_js')
 </body>
 </html>

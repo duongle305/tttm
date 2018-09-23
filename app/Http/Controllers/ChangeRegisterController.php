@@ -90,7 +90,7 @@ class ChangeRegisterController extends Controller
         $data = $request->all();
         $data['date'] = Carbon::createFromFormat('m/d/Y', $request->date)->toDateString();
         ChangeRegister::create($data);
-        return redirect()->route('change_registers.index');
+        return redirect()->route('change_registers.index')->with(['message'=>'Thêm mới đầu việc thành công !!']);
 
     }
 
@@ -140,7 +140,7 @@ class ChangeRegisterController extends Controller
         $data = $request->all();
         $data['date'] = Carbon::createFromFormat('m/d/Y', $request->date)->toDateString();
         $change->update($data);
-        return redirect()->route('change_registers.index');
+        return redirect()->route('change_registers.index')->with(['message'=>'Cập nhật đầu việc thành công !!']);
     }
 
     /**
@@ -151,6 +151,8 @@ class ChangeRegisterController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $change = ChangeRegister::find($id);
+        $change->delete();
+        return redirect()->route('change_registers.index')->with(['message'=>'Xóa thành công !!']);
     }
 }
