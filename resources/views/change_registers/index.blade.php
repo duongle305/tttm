@@ -14,7 +14,7 @@
                 <h6 class="panel-title">Danh sách đầu việc</h6>
             </div>
             <div class="col-lg-2 text-right pb-10">
-                <a href="{{ route('change_registers.create') }}" class="btn btn-success"><i class="icon-plus2"></i> Thêm mới</a>
+                <a href="{{ route('change-registers.create') }}" class="btn btn-success"><i class="icon-plus2"></i> Thêm mới</a>
             </div>
         </div>
         <div class="panel-body">
@@ -44,7 +44,7 @@
         $('#change_registers_table').DataTable({
             processing: true,
             serverSide: true,
-            ajax: '{!! route('change_registers.all') !!}',
+            ajax: '{!! route('change-registers.all') !!}',
             columns: [
                 { data: 'id', name: 'id' },
                 { data: 'date',name: 'date'},

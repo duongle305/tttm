@@ -42,7 +42,7 @@ class ChangeRegisterController extends Controller
                                     <i class="icon-menu9"></i>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-right">
-                                    <li><a href="'.route('change_registers.edit', $item->id).'"><i class="icon-eye"></i> Xem chi tiết</a></li>
+                                    <li><a href="'.route('change-registers.edit', $item->id).'"><i class="icon-eye"></i> Xem chi tiết</a></li>
                                     <li><a href="#"><i class="icon-file-pdf"></i> Xóa</a></li>
                                 </ul>
                             </li>
@@ -60,7 +60,7 @@ class ChangeRegisterController extends Controller
     public function create()
     {
         $users = User::all();
-        return view('change_registers.create')->with(compact('users'));
+        return view('change-registers.create')->with(compact('users'));
     }
 
     /**
@@ -90,7 +90,7 @@ class ChangeRegisterController extends Controller
         $data = $request->all();
         $data['date'] = Carbon::createFromFormat('m/d/Y', $request->date)->toDateString();
         ChangeRegister::create($data);
-        return redirect()->route('change_registers.index')->with(['message'=>'Thêm mới đầu việc thành công !!']);
+        return redirect()->route('change-registers.index')->with(['message'=>'Thêm mới đầu việc thành công !!']);
 
     }
 
@@ -108,7 +108,7 @@ class ChangeRegisterController extends Controller
         $data->creator = User::find($data->creator_id)->name;
         $data->team = User::find($data->creator_id)->team->name;
         $users = User::all();
-        return  view('change_registers.edit')->with(compact(['data','users']));
+        return  view('change-registers.edit')->with(compact(['data','users']));
     }
 
     /**
@@ -140,7 +140,7 @@ class ChangeRegisterController extends Controller
         $data = $request->all();
         $data['date'] = Carbon::createFromFormat('m/d/Y', $request->date)->toDateString();
         $change->update($data);
-        return redirect()->route('change_registers.index')->with(['message'=>'Cập nhật đầu việc thành công !!']);
+        return redirect()->route('change-registers.index')->with(['message'=>'Cập nhật đầu việc thành công !!']);
     }
 
     /**
@@ -153,6 +153,6 @@ class ChangeRegisterController extends Controller
     {
         $change = ChangeRegister::find($id);
         $change->delete();
-        return redirect()->route('change_registers.index')->with(['message'=>'Xóa thành công !!']);
+        return redirect()->route('change-registers.index')->with(['message'=>'Xóa thành công !!']);
     }
 }

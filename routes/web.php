@@ -27,12 +27,14 @@ Route::middleware('auth')->group(function(){
         return view('change_registers.index');
     });
     //local transfer
-    Route::get('change-local-transfers','LocalTransferController@index')->name('local_transfers.index');
-    Route::post('ajax/nodes','LocalTransferController@getNodes')->name('local_transfers.nodes');
+    Route::get('change-local-transfers','LocalTransferController@index')->name('local-transfers.index');
+    Route::post('ajax/nodes','LocalTransferController@getNodes')->name('local-transfers.nodes');
     //repository transfers
-    Route::get('/repository-transfers','LocalTransferController@repositoryTransfer')->name('local_repository_transfers.create');
+    Route::get('/ware-house-transfers','LocalTransferController@wareHouseTransfers')->name('local-warehouse-transfers.create');
+    Route::post('ajax/warehouses','LocalTransferController@getWareHouseTransfers')->name('local-transfers.warehouses');
+    Route::post('ajax/assets','LocalTransferController@getAssetByWareHouseId')->name('local-transfers.assets');
 
     Route::get('users', 'ChangeRegisterController@users')->name('cr.users');
-    Route::get('change_registers/all','ChangeRegisterController@allChangeRegister')->name('change_registers.all');
-    Route::resource('change_registers','ChangeRegisterController')->except(['show']);
+    Route::get('change-registers/all','ChangeRegisterController@allChangeRegister')->name('change-registers.all');
+    Route::resource('change-registers','ChangeRegisterController')->except(['show']);
 });

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Asset;
 use App\Node;
+use App\WareHouse;
 use Illuminate\Http\Request;
 use function PHPSTORM_META\map;
 
@@ -23,7 +25,7 @@ class LocalTransferController extends Controller
     public function getNodes(Request $request)
     {
         $nodes = Node::where('name', 'like', "%$request->keyWord%")
-            ->select(['id', 'name', 'manager', 'warehouse_id'])
+            ->select(['id', 'name', 'manager', 'nims', 'warehouse_id'])
             ->get();
         if(!empty($request->step1_item_id)){
             $nodes = collect($nodes)->map(function($item) use ($request){
@@ -40,11 +42,37 @@ class LocalTransferController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function repositoryTransfer()
+    public function wareHouseTransfers()
     {
-        return view('local_transfers.repository');
+        return view('local_transfers.warehouse');
     }
-
+    public function getWareHouseTransfers(Request $request){
+        $wareHouses = WareHouse::where('name','like',"%$request->keyword%")
+            ->select(['id','name','code','parent_text'])
+            ->get();
+        if(!empty($request->prevStepId)){
+            $wareHouses = collect($wareHouses)->map(function($item) use($request){
+                if($request->prevStepId === $item->id) {
+                    unset($item);
+                }else return $item;
+            })->all();
+        }
+        return response()->json($wareHouses,200);
+    }
+    public function getAssetByWareHouseId(Request $request){
+        if($request->warehouse_id == null) return [];
+        $excepts = $request->excepts;
+        $assets = Asset::where('warehouse_id',$request->warehouse_id)
+            ->with(['qlts_code'])
+            ->get();
+        $assets = collect($assets)->map(function($item, $key){
+            $key = $item->id;
+            $item->key = $key;
+            $item->name = $item->qlts_code->name;
+            return $item;
+        })->except($excepts)->all();
+        return response()->json($assets, 200);
+    }
     public function create()
     {
         //
