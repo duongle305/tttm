@@ -24,7 +24,7 @@
                 </a>
 
                 <ul class="dropdown-menu">
-                    <li><a class="deutsch"><img src="{{ asset('assets/images/flags/en.png')  }}" alt=""> English</a></li>
+                    <li><a class="deutsch"><img src="{{ asset('assets/images/flags/th.png')  }}" alt=""> English</a></li>
                 </ul>
             </li>
             <li class="dropdown dropdown-user">
