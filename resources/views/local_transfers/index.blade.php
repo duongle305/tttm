@@ -92,22 +92,19 @@
                         };
                     },
                     processResults: function (data, params) {
-                        console.log(data);
                         return {
-                            results: data
+                            results: $.map(data, function (item) {
+                                return {
+                                    text: `${item.name} | ${item.manager}`,
+                                    id: item.id,
+                                    data: item
+                                };
+                            })
                         };
                     },
                     templateResult: mapOption()
                 }
             });
         });
-
-        var mapOption = (datas) => {
-            let a="";
-            datas.forEach(function (data) {
-                a +=`<option value="${data.id}">${data.name} | ${data.manager}</option>`;
-            });
-            return a;
-        }
     </script>
 @endsection
