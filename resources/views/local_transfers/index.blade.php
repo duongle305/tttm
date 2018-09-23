@@ -96,7 +96,8 @@
                         return {
                             results: data
                         };
-                    }
+                    },
+                    templateResult: mapOption()
                 }
             });
         });

@@ -28,6 +28,10 @@ class LocalTransferController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function repositoryTransfer()
+    {
+        return view('local_transfers.repository');
+    }
     public function create()
     {
         //

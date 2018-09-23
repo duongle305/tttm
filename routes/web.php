@@ -29,6 +29,8 @@ Route::middleware('auth')->group(function(){
     //local transfer
     Route::get('change-local-transfers','LocalTransferController@index')->name('local_transfers.index');
     Route::post('ajax/nodes','LocalTransferController@getNodes');
+    //repository transfers
+    Route::get('/repository-transfers','LocalTransferController@repositoryTransfer')->name('local_repository_transfers.create');
 
     Route::get('users', 'ChangeRegisterController@users')->name('cr.users');
     Route::get('change_registers/all','ChangeRegisterController@allChangeRegister')->name('change_registers.all');

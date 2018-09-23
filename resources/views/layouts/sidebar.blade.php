@@ -31,7 +31,7 @@
                 <ul class="navigation navigation-main navigation-accordion">
                     <!-- Main -->
                     <li class="navigation-header"><span>Main</span> <i class="icon-menu" title="Main pages"></i></li>
-                    <li class="active"><a href=""><i class="icon-home4"></i> <span>Dashboard</span></a></li>
+                    <li><a href=""><i class="icon-home4"></i> <span>Dashboard</span></a></li>
                     <li>
                         <a href="#"><i class="icon-stack2"></i> <span>Quản lý điều chuyển</span></a>
                         <ul>
@@ -39,6 +39,7 @@
                         </ul>
                         <ul>
                             <li><a href="{{ route('local_transfers.index') }}">Điều chuyển giữa các node nội bộ</a></li>
+                            <li><a href="{{ route('local_repository_transfers.create') }}">Điều chuyển giữa các kho nội bộ</a></li>
                         </ul>
                     </li>
                 </ul>
