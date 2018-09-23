@@ -219,10 +219,6 @@
                 }
             });
 
-<<<<<<< HEAD
-            $('#step_1_select').on('select2:select', function (e) {
-
-=======
             $('#step_2_select').select2();
             $('#step_1_select').on('select2:select', function (e) {
                 if (e.params.data.data.warehouse_id == null) {
@@ -232,7 +228,6 @@
                     });
                     return false;
                 }
->>>>>>> fd4380253bab75dd8a51e33ddc392627d109afe0
             });
         });
     </script>
