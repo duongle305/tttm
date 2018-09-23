@@ -26,8 +26,11 @@ Route::middleware('auth')->group(function(){
     Route::get('/home', function () {
         return view('change_registers.index');
     });
-    Route::get('users', 'ChangeRegisterController@users')->name('cr.users');
+    //local transfer
+    Route::get('change-local-transfers','LocalTransferController@index')->name('local_transfers.index');
+    Route::post('ajax/nodes','LocalTransferController@getNodes');
 
+    Route::get('users', 'ChangeRegisterController@users')->name('cr.users');
     Route::get('change_registers/all','ChangeRegisterController@allChangeRegister')->name('change_registers.all');
     Route::resource('change_registers','ChangeRegisterController')->except(['show']);
 });

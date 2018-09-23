@@ -31,11 +31,14 @@
                 <ul class="navigation navigation-main navigation-accordion">
                     <!-- Main -->
                     <li class="navigation-header"><span>Main</span> <i class="icon-menu" title="Main pages"></i></li>
-                    <li class="active"><a href="index.html"><i class="icon-home4"></i> <span>Dashboard</span></a></li>
+                    <li class="active"><a href=""><i class="icon-home4"></i> <span>Dashboard</span></a></li>
                     <li>
                         <a href="#"><i class="icon-stack2"></i> <span>Quản lý điều chuyển</span></a>
                         <ul>
                             <li><a href="{{ route('change_registers.index') }}">Danh sách đầu việc</a></li>
+                        </ul>
+                        <ul>
+                            <li><a href="{{ route('local_transfers.index') }}">Điều chuyển giữa các node nội bộ</a></li>
                         </ul>
                     </li>
                 </ul>

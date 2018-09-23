@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <input type="hidden" name="_token" value="{{ csrf_token() }}">
     <title>{{ config('app.name')  }} - @yield('title')</title>
 
     <!-- Global stylesheets -->
@@ -26,6 +27,7 @@
     <!-- Theme JS files -->
     @yield('vendor_js')
     <script type="text/javascript" src="{{ asset('assets/js/core/app.js') }}"></script>
+
     <!-- /theme JS files -->
 
 </head>
