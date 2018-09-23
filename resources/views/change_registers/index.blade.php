@@ -26,12 +26,11 @@
                     <th>Người tạo</th>
                     <th>Ban</th>
                     <th>Số CR</th>
-                    <th>Người phối hợp</th>
-                    <th>SĐT phối hợp</th>
                     <th>Người thực hiện</th>
                     <th>Nội dung thực hiện</th>
                     <th>Người kiểm tra</th>
                     <th>Kết quả</th>
+                    <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -52,12 +51,11 @@
                 { data: 'creator',name: 'creator'},
                 { data: 'team', name: 'team'},
                 { data: 'cr_number',name: 'cr_number'},
-                { data: 'combintor',name: 'combintor'},
-                { data: 'combine_phone_nb',name: 'combine_phone_nb'},
                 { data: 'executor',name: 'executor'},
                 { data: 'execute_content',name: 'execute_content'},
                 { data: 'tester',name: 'tester'},
                 { data: 'result',name: 'result'},
+                { data: 'actions',name: 'actions', orderable: false, searchable: false},
             ]
         });
     </script>

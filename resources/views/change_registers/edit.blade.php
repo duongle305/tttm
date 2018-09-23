@@ -12,59 +12,60 @@
             <h6 class="panel-title">Thêm mới đầu việc</h6>
         </div>
         <div class="panel-body">
-            <form action="{{ route('change_registers.store') }}" class="form-horizontal" method="post">
+            <form action="{{ route('change_registers.update', $data->id) }}" class="form-horizontal" method="post">
                 <fieldset class="content-group">
                     {{ csrf_field() }}
+                    {{ method_field('PUT') }}
                     <div class="form-group">
                         <label class="control-label col-lg-2">Ngày<span class="text-danger">*</span></label>
                         <div class="col-lg-10">
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="icon-calendar22"></i></span>
-                                <input name="date" type="text" class="form-control daterange-single" value="{{ old('date') }}">
+                                <input name="date" type="text" class="form-control daterange-single" value="{{ date('m/d/Y', strtotime($data->date)) }}" readonly="readonly">
                             </div>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="control-label col-lg-2">Người tạo<span class="text-danger">*</span></label>
                         <div class="col-lg-10">
-                            <input  type="text" class="form-control" readonly="readonly" value="{{ auth()->user()->name }}" >
-                            <input type="text" name="creator_id" hidden value="{{ auth()->user()->id }}">
+                            <input  type="text" class="form-control" readonly="readonly" value="{{ $data->creator }}" >
+                            <input type="text" name="creator_id" hidden value="{{ $data->creator_id }}">
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="control-label col-lg-2">Ban<span class="text-danger">*</span></label>
                         <div class="col-lg-10">
-                            <input type="text" class="form-control" readonly="readonly" value="{{ auth()->user()->team->name }}">
+                            <input type="text" class="form-control" readonly="readonly" value="{{ $data->team }}">
                         </div>
                     </div>
                     <div class="form-group {{ $errors->has('cr_number')? 'has-error has-feedback':'' }}">
                         <label class="control-label col-lg-2">Số CR<span class="text-danger">*</span></label>
                         <div class="col-lg-10">
-                            <input name="cr_number" type="text" class="form-control" value="{{ old('cr_number') }}">
+                            <input name="cr_number" type="text" class="form-control" value="{{ $data->cr_number }}" readonly="readonly">
                             <span class="help-block">{{ $errors->has('cr_number') ? $errors->first('cr_number') : '' }}</span>
                         </div>
                     </div>
                     <div class="form-group {{ $errors->has('content')? 'has-error has-feedback':'' }}">
                         <label class="control-label col-lg-2">Nội dung<span class="text-danger">*</span></label>
                         <div class="col-lg-10">
-                            <textarea name="content" rows="3" cols="5" class="form-control">{{ old('content') }}</textarea>
+                            <textarea name="content" rows="3" cols="5" class="form-control">{{ $data->content }}</textarea>
                             <span class="help-block">{{ $errors->has('content') ? $errors->first('content') : '' }}</span>
                         </div>
                     </div>
                     <div class="form-group {{ $errors->has('purpose')? 'has-error has-feedback':'' }}">
                         <label class="control-label col-lg-2">Mục đích<span class="text-danger">*</span></label>
                         <div class="col-lg-10">
-                            <textarea name="purpose" rows="3" cols="5" class="form-control">{{ old('purpose') }}</textarea>
+                            <textarea name="purpose" rows="3" cols="5" class="form-control">{{ $data->purpose }}</textarea>
                             <span class="help-block">{{ $errors->has('purpose') ? $errors->first('purpose') : '' }}</span>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="control-label col-lg-2">Người chuẩn bị</label>
                         <div class="col-lg-10">
-                            <select class="select-search" id="preparer_id">
+                            <select class="select-search" id="prearer_id">
                                 <option value="">None</option>
                                 @foreach($users as $user)
-                                    <option value="{{ $user->id }}" {{ old("preparer_id") == $user->id?'selected':'' }}>{{ $user->name }}</option>
+                                    <option value="{{ $user->id }}" {{ $data->prepare_id == $user->id?'selected':'' }}>{{ $user->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -72,7 +73,7 @@
                     <div class="form-group">
                         <label class="control-label col-lg-2">Nội dung chuẩn bị</label>
                         <div class="col-lg-10">
-                            <input type="text" name="prepare_content" class="form-control" value="{{ old('prepare_content') }}">
+                            <input type="text" name="prepare_content" class="form-control" value="{{ $data->prepare_content }}">
                         </div>
                     </div>
                     <div class="form-group {{ $errors->has('combinator_id')? 'has-error has-feedback':'' }}">
@@ -81,7 +82,7 @@
                             <select class="select-search" id="combinator_id">
                                 <option value="">None</option>
                                 @foreach($users as $user)
-                                    <option value="{{ $user->id }}" {{ old("combinator_id") == $user->id?'selected':'' }}>{{ $user->name }}</option>
+                                    <option value="{{ $user->id }}" {{ $data->combinator_id == $user->id?'selected':'' }}>{{ $user->name }}</option>
                                 @endforeach
                             </select>
                             <span class="help-block">{{ $errors->has('combinator_id') ? $errors->first('combinator_id') : '' }}</span>
@@ -90,7 +91,7 @@
                     <div class="form-group {{ $errors->has('combine_phone_nb')? 'has-error has-feedback':'' }}">
                         <label class="control-label col-lg-2">SĐT phối hợp</label>
                         <div class="col-lg-10">
-                            <input name="combine_phone_nb" type="text" class="form-control" value="{{ old('combine_phone_nb') }}">
+                            <input name="combine_phone_nb" type="text" class="form-control" value="{{ $data->combine_phone_nb }}">
                             <span class="help-block">{{ $errors->has('combine_phone_nb') ? $errors->first('combine_phone_nb') : '' }}</span>
                         </div>
                     </div>
@@ -100,7 +101,7 @@
                             <select name="executor_id" class="select-search">
                                 <option value="">None</option>
                                 @foreach($users as $user)
-                                    <option value="{{ $user->id }}" {{ old("executor_id") == $user->id?'selected':'' }}>{{ $user->name }}</option>
+                                    <option value="{{ $user->id }}" {{ $data->executor_id == $user->id?'selected':'' }}>{{ $user->name }}</option>
                                 @endforeach
                             </select>
                             <span class="help-block">{{ $errors->has('executor_id') ? $errors->first('executor_id') : '' }}</span>
@@ -109,7 +110,7 @@
                     <div class="form-group {{ $errors->has('execute_content')? 'has-error has-feedback':'' }}">
                         <label class="control-label col-lg-2">Nội dung thực hiện<span class="text-danger">*</span></label>
                         <div class="col-lg-10">
-                            <textarea name="execute_content" rows="3" cols="5" class="form-control">{{ old('execute_content') }}</textarea>
+                            <textarea name="execute_content" rows="3" cols="5" class="form-control">{{ $data->execute_content }}</textarea>
                             <span class="help-block">{{ $errors->has('execute_content') ? $errors->first('execute_content') : '' }}</span>
                         </div>
                     </div>
@@ -119,7 +120,7 @@
                             <select name="tester_id" class="select-search">
                                 <option value="">None</option>
                                 @foreach($users as $user)
-                                    <option value="{{ $user->id }}" {{ old("tester_id") == $user->id?'selected':'' }}>{{ $user->name }}</option>
+                                    <option value="{{ $user->id }}" {{ $data->tester_id == $user->id?'selected':'' }}>{{ $user->name }}</option>
                                 @endforeach
                             </select>
                             <span class="help-block">{{ $errors->has('tester_id') ? $errors->first('tester_id') : '' }}</span>
@@ -128,19 +129,20 @@
                     <div class="form-group {{ $errors->has('result')? 'has-error has-feedback':'' }}">
                         <label class="control-label col-lg-2">Kết quả</label>
                         <div class="col-lg-10">
-                            <input name="result" type="text" class="form-control" value="{{ old('result') }}">
+                            <input name="result" type="text" class="form-control" value="{{ $data->result }}">
                             <span class="help-block">{{ $errors->has('result') ? $errors->first('result') : '' }}</span>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="control-label col-lg-2">Ghi chú</label>
                         <div class="col-lg-10">
-                            <textarea name="note" rows="3" cols="5" class="form-control"> {{ old('note') }}</textarea>
+                            <textarea name="note" rows="3" cols="5" class="form-control"> {{ $data->note }}</textarea>
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="col-lg-12  text-right">
                             <button type="submit" class="btn btn-success">Submit</button>
+                            <a href="{{ route('change_registers.index') }}" class="btn btn-danger">Close</a>
                         </div>
                     </div>
                 </fieldset>
@@ -149,16 +151,7 @@
     </div>
 @endsection
 @section('custom_js')
-    <script> // Single picker
-        $('.daterange-single').daterangepicker({
-            singleDatePicker: true
-        });
-
+    <script>
         $('.select-search').select2();
-        $.get('{{ route('cr.users') }}').done((users)=>{
-            for(let option of users)
-                $('.select-search').append("<option value='"+ option.id + "'>" + option.name + "</option>");
-        });
-
     </script>
 @endsection

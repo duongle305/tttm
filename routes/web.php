@@ -29,7 +29,5 @@ Route::middleware('auth')->group(function(){
     Route::get('users', 'ChangeRegisterController@users')->name('cr.users');
 
     Route::get('change_registers/all','ChangeRegisterController@allChangeRegister')->name('change_registers.all');
-    Route::get('change_registers','ChangeRegisterController@index')->name('change_registers.index');
-    Route::get('change_registers/create','ChangeRegisterController@create')->name('change_registers.create');
-    Route::post('change_registers/store','ChangeRegisterController@store')->name('change_registers.store');
+    Route::resource('change_registers','ChangeRegisterController')->except(['show']);
 });
