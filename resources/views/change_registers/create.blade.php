@@ -16,7 +16,12 @@
                 <fieldset class="content-group">
                     {{ csrf_field() }}
                     <div class="form-group">
-                        Người chuẩn bị
+                        <label class="control-label col-lg-2">Ngày<span class="text-danger">*</span></label>
+                        <div class="col-lg-10">
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="icon-calendar22"></i></span>
+                                <input name="date" type="text" class="form-control daterange-single" value="{{ old('date') }}">
+                            </div>
                         </div>
                     </div>
                     <div class="form-group">
@@ -29,7 +34,7 @@
                     <div class="form-group">
                         <label class="control-label col-lg-2">Ban<span class="text-danger">*</span></label>
                         <div class="col-lg-10">
-                            <input type="text" class="form-control" readonly="readonly" value="">
+                            <input type="text" class="form-control" readonly="readonly" value="{{ auth()->user()->team->name }}">
                         </div>
                     </div>
                     <div class="form-group {{ $errors->has('cr_number')? 'has-error has-feedback':'' }}">

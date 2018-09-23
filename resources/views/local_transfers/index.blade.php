@@ -98,12 +98,15 @@
                                     text: `${item.name} | ${item.manager}`,
                                     id: item.id,
                                     data: item
-                                };
+                            };
                             })
                         };
-                    },
-                    templateResult: mapOption()
+                    }
                 }
+            });
+
+            $('#step_1_select').on('select2:select', function (e) {
+
             });
         });
     </script>
