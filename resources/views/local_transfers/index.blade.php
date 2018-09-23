@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 @extends ('layouts.app')
 
 @section('title','Thêm mới đâu việc')
