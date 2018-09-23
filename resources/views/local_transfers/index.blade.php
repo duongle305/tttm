@@ -2,14 +2,13 @@
 
 @section('title','Thêm mới đâu việc')
 @section('vendor_js')
+    <script type="text/javascript" src="{{ asset('assets/js/plugins/notifications/jgrowl.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/js/plugins/forms/wizards/steps.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/js/plugins/forms/selects/select2.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/js/plugins/forms/styling/uniform.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/js/core/libraries/jasny_bootstrap.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/js/plugins/forms/validation/validate.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/js/plugins/extensions/cookie.js') }}"></script>
-
-    <script type="text/javascript" src="{{ asset('assets/js/pages/wizard_steps.js') }}"></script>
 @endsection
 @section('content')
     <div class="panel panel-white">
@@ -28,7 +27,9 @@
                             <label class="col-lg-1 control-label">Node<span class="text-danger">*</span></label>
                             <div class="col-lg-11">
                                 <select data-placeholder="Chọn node..." class="select" id="step_1_select"></select>
-                                <h6 class="grey-300 text-center mt-10">Danh sách hiển thị là các node đã liên kết với kho dành riêng cho mỗi node. nếu không tìm thấy hãy qua <code>Quản lý node</code> để liên kết kho</h6>
+                                <h6 class="grey-300 text-center mt-10">Danh sách hiển thị là các node đã liên kết với
+                                    kho dành riêng cho mỗi node. nếu không tìm thấy hãy qua <code>Quản lý node</code> để
+                                    liên kết kho</h6>
                             </div>
                         </div>
                     </div>
@@ -48,7 +49,9 @@
                                 <select data-placeholder="Chọn node..." class="select" id="step_2_select">
                                     <option></option>
                                 </select>
-                                <h6 class="grey-300 text-center mt-10">Danh sách hiển thị là các node đã liên kết với kho dành riêng cho mỗi node. nếu không tìm thấy hãy qua <code>Quản lý node</code> để liên kết kho</h6>
+                                <h6 class="grey-300 text-center mt-10">Danh sách hiển thị là các node đã liên kết với
+                                    kho dành riêng cho mỗi node. nếu không tìm thấy hãy qua <code>Quản lý node</code> để
+                                    liên kết kho</h6>
                             </div>
                         </div>
                     </div>
@@ -79,6 +82,20 @@
 @section('custom_js')
     <script>
         $(document).ready(function () {
+
+            $(".steps-basic").steps({
+                headerTag: "h6",
+                bodyTag: "fieldset",
+                transitionEffect: "fade",
+                titleTemplate: '<span class="number">#index#</span> #title#',
+                labels: {
+                    finish: 'Submit'
+                },
+                onFinished: function (event, currentIndex) {
+                    alert("Form submitted.");
+                }
+            });
+
             $('#step_1_select').select2({
                 minimumInputLength: 1,
                 ajax: {
@@ -102,6 +119,17 @@
                             })
                         };
                     }
+                }
+            });
+
+            $('#step_1_select').on('select2:select', function (e) {
+                if (e.params.data.data.warehouse_id == null) {
+                    $.jGrowl('Hệ thống đang bị lỗi rất nghiêm trọng, vui lòng liên hệ system admin để biết chi tiết', {
+                        header: 'Nguy hiểm!',
+                        theme: 'bg-danger'
+                    });
+                    var a = $('.actions').children('ul').children('li').next().children()[0];
+                    $(a).attr('disabled', 'true');
                 }
             });
         });
