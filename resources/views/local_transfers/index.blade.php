@@ -105,13 +105,5 @@
                 }
             });
         });
-
-        var mapOption = (datas) => {
-            let a="";
-            datas.forEach(function (data) {
-                a +=`<option value="${data.id}">${data.name} | ${data.manager}</option>`;
-            });
-            return a;
-        }
     </script>
 @endsection
