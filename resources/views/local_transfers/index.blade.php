@@ -2,14 +2,13 @@
 
 @section('title','Thêm mới đâu việc')
 @section('vendor_js')
+    <script type="text/javascript" src="{{ asset('assets/js/plugins/notifications/jgrowl.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/js/plugins/forms/wizards/steps.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/js/plugins/forms/selects/select2.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/js/plugins/forms/styling/uniform.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/js/core/libraries/jasny_bootstrap.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/js/plugins/forms/validation/validate.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/js/plugins/extensions/cookie.js') }}"></script>
-
-    <script type="text/javascript" src="{{ asset('assets/js/pages/wizard_steps.js') }}"></script>
 @endsection
 @section('content')
     <div class="panel panel-white">
@@ -17,7 +16,7 @@
             <h6 class="panel-title">Basic example</h6>
         </div>
 
-        <form class="steps-basic" action="#">
+        <form class="steps-validation" action="#">
             <h6>Chọn Node đích</h6>
             <fieldset>
                 <div class="row mb-10">
@@ -27,8 +26,10 @@
                         <div class="form-group">
                             <label class="col-lg-1 control-label">Node<span class="text-danger">*</span></label>
                             <div class="col-lg-11">
-                                <select data-placeholder="Chọn node..." class="select" id="step_1_select"></select>
-                                <h6 class="grey-300 text-center mt-10">Danh sách hiển thị là các node đã liên kết với kho dành riêng cho mỗi node. nếu không tìm thấy hãy qua <code>Quản lý node</code> để liên kết kho</h6>
+                                <select data-placeholder="Chọn node..." class="select required" id="step_1_select"></select>
+                                <h6 class="grey-300 text-center mt-10">Danh sách hiển thị là các node đã liên kết với
+                                    kho dành riêng cho mỗi node. nếu không tìm thấy hãy qua <code>Quản lý node</code> để
+                                    liên kết kho</h6>
                             </div>
                         </div>
                     </div>
@@ -45,10 +46,12 @@
                         <div class="form-group">
                             <label class="col-lg-1 control-label">Node<span class="text-danger">*</span></label>
                             <div class="col-lg-11">
-                                <select data-placeholder="Chọn node..." class="select" id="step_2_select">
+                                <select data-placeholder="Chọn node..." class="select required" id="step_2_select">
                                     <option></option>
                                 </select>
-                                <h6 class="grey-300 text-center mt-10">Danh sách hiển thị là các node đã liên kết với kho dành riêng cho mỗi node. nếu không tìm thấy hãy qua <code>Quản lý node</code> để liên kết kho</h6>
+                                <h6 class="grey-300 text-center mt-10">Danh sách hiển thị là các node đã liên kết với
+                                    kho dành riêng cho mỗi node. nếu không tìm thấy hãy qua <code>Quản lý node</code> để
+                                    liên kết kho</h6>
                             </div>
                         </div>
                     </div>
@@ -79,6 +82,117 @@
 @section('custom_js')
     <script>
         $(document).ready(function () {
+            var form = $(".steps-validation").show();
+
+            $(".steps-validation").steps({
+                headerTag: "h6",
+                bodyTag: "fieldset",
+                transitionEffect: "fade",
+                titleTemplate: '<span class="number">#index#</span> #title#',
+                autoFocus: true,
+                onStepChanging: function (event, currentIndex, newIndex) {
+
+                    // Allways allow previous action even if the current form is not valid!
+                    if (currentIndex > newIndex) {
+                        return true;
+                    }
+
+                    // Forbid next action on "Warning" step if the user is to young
+                    if (newIndex === 3 && Number($("#age-2").val()) < 18) {
+                        return false;
+                    }
+
+                    // Needed in some cases if the user went back (clean up)
+                    if (currentIndex < newIndex) {
+
+                        // To remove error styles
+                        form.find(".body:eq(" + newIndex + ") label.error").remove();
+                        form.find(".body:eq(" + newIndex + ") .error").removeClass("error");
+                    }
+
+                    form.validate().settings.ignore = ":disabled,:hidden";
+                    return form.valid();
+                },
+
+                onStepChanged: function (event, currentIndex, priorIndex) {
+
+                    // Used to skip the "Warning" step if the user is old enough.
+                    if (currentIndex === 2 && Number($("#age-2").val()) >= 18) {
+                        form.steps("next");
+                    }
+
+                    // Used to skip the "Warning" step if the user is old enough and wants to the previous step.
+                    if (currentIndex === 2 && priorIndex === 3) {
+                        form.steps("previous");
+                    }
+                },
+
+                onFinishing: function (event, currentIndex) {
+                    form.validate().settings.ignore = ":disabled";
+                    return form.valid();
+                },
+
+                onFinished: function (event, currentIndex) {
+                    alert("Submitted!");
+                }
+            });
+
+            $(".steps-validation").validate({
+                ignore: 'input[type=hidden], .select2-search__field', // ignore hidden fields
+                errorClass: 'validation-error-label',
+                successClass: 'validation-valid-label',
+                highlight: function (element, errorClass) {
+                    $(element).removeClass(errorClass);
+                },
+                unhighlight: function (element, errorClass) {
+                    $(element).removeClass(errorClass);
+                },
+
+                // Different components require proper error label placement
+                errorPlacement: function (error, element) {
+
+                    // Styled checkboxes, radios, bootstrap switch
+                    if (element.parents('div').hasClass("checker") || element.parents('div').hasClass("choice") || element.parent().hasClass('bootstrap-switch-container')) {
+                        if (element.parents('label').hasClass('checkbox-inline') || element.parents('label').hasClass('radio-inline')) {
+                            error.appendTo(element.parent().parent().parent().parent());
+                        }
+                        else {
+                            error.appendTo(element.parent().parent().parent().parent().parent());
+                        }
+                    }
+
+                    // Unstyled checkboxes, radios
+                    else if (element.parents('div').hasClass('checkbox') || element.parents('div').hasClass('radio')) {
+                        error.appendTo(element.parent().parent().parent());
+                    }
+
+                    // Input with icons and Select2
+                    else if (element.parents('div').hasClass('has-feedback') || element.hasClass('select2-hidden-accessible')) {
+                        error.appendTo(element.parent());
+                    }
+
+                    // Inline checkboxes, radios
+                    else if (element.parents('label').hasClass('checkbox-inline') || element.parents('label').hasClass('radio-inline')) {
+                        error.appendTo(element.parent().parent());
+                    }
+
+                    // Input group, styled file input
+                    else if (element.parent().hasClass('uploader') || element.parents().hasClass('input-group')) {
+                        error.appendTo(element.parent().parent());
+                    }
+
+                    else {
+                        error.insertAfter(element);
+                    }
+                },
+                rules: {
+                    email: {
+                        email: true
+                    }
+                }
+            });
+
+
             $('#step_1_select').select2({
                 minimumInputLength: 1,
                 ajax: {
@@ -105,8 +219,20 @@
                 }
             });
 
+<<<<<<< HEAD
             $('#step_1_select').on('select2:select', function (e) {
 
+=======
+            $('#step_2_select').select2();
+            $('#step_1_select').on('select2:select', function (e) {
+                if (e.params.data.data.warehouse_id == null) {
+                    $.jGrowl('Hệ thống đang bị lỗi rất nghiêm trọng, vui lòng liên hệ system admin để biết chi tiết', {
+                        header: 'Nguy hiểm!',
+                        theme: 'bg-danger'
+                    });
+                    return false;
+                }
+>>>>>>> fd4380253bab75dd8a51e33ddc392627d109afe0
             });
         });
     </script>
