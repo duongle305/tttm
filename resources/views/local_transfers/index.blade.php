@@ -82,6 +82,7 @@
 @section('custom_js')
     <script>
         $(document).ready(function () {
+            var status = false;
             var form = $(".steps-validation").show();
 
             $(".steps-validation").steps({
@@ -92,24 +93,23 @@
                 autoFocus: true,
                 onStepChanging: function (event, currentIndex, newIndex) {
 
-                    // Allways allow previous action even if the current form is not valid!
+
                     if (currentIndex > newIndex) {
                         return true;
                     }
 
-                    // Forbid next action on "Warning" step if the user is to young
                     if (newIndex === 3 && Number($("#age-2").val()) < 18) {
                         return false;
                     }
 
-                    // Needed in some cases if the user went back (clean up)
                     if (currentIndex < newIndex) {
 
-                        // To remove error styles
                         form.find(".body:eq(" + newIndex + ") label.error").remove();
                         form.find(".body:eq(" + newIndex + ") .error").removeClass("error");
                     }
-
+                    if(!status){
+                        return false
+                    }
                     form.validate().settings.ignore = ":disabled,:hidden";
                     return form.valid();
                 },
@@ -206,6 +206,7 @@
                         };
                     },
                     processResults: function (data, params) {
+                        console.log(data);
                         return {
                             results: $.map(data, function (item) {
                                 return {
@@ -219,14 +220,57 @@
                 }
             });
 
-            $('#step_2_select').select2();
+            $('#step_2_select').select2({
+                minimumInputLength: 1,
+                ajax: {
+                    url: '/ajax/nodes',
+                    headers: {'X-CSRF-Token': $('input[name="_token"]').attr('value')},
+                    type: 'POST',
+                    dataType: 'json',
+                    data: function (params) {
+                        return {
+                            step1_item_id:localStorage.getItem('step1'),
+                            keyWord: params.term
+                        };
+                    },
+                    processResults: function (data, params) {
+                        console.log(data);
+                        return {
+                            results: $.map(data, function (item) {
+                                if(item != null) return {
+                                    text: `${item.name} | ${item.manager}`,
+                                    id: item.id,
+                                    data: item
+                                };
+                            })
+                        };
+                    }
+                }
+            });
+
+
             $('#step_1_select').on('select2:select', function (e) {
                 if (e.params.data.data.warehouse_id == null) {
-                    $.jGrowl('Hệ thống đang bị lỗi rất nghiêm trọng, vui lòng liên hệ system admin để biết chi tiết', {
+                    $.jGrowl('Hệ thống đang bị lỗi rất nghiêm trọng, vui lòng liên hệ System admin để biết chi tiết', {
                         header: 'Nguy hiểm!',
                         theme: 'bg-danger'
                     });
-                    return false;
+                    status = false;
+                } else {
+                    localStorage.setItem('step1',e.params.data.data.id);
+                    status = true;
+                }
+            });
+
+            $('#step_2_select').on('select2:select', function (e) {
+                if (e.params.data.data.warehouse_id == null) {
+                    $.jGrowl('Hệ thống đang bị lỗi rất nghiêm trọng, vui lòng liên hệ System admin để biết chi tiết', {
+                        header: 'Nguy hiểm!',
+                        theme: 'bg-danger'
+                    });
+                    status = false;
+                } else {
+                    status = true;
                 }
             });
         });
