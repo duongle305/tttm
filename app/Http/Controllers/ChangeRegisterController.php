@@ -6,6 +6,7 @@ use App\ChangeRegister;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Yajra\DataTables\DataTables;
 
 class ChangeRegisterController extends Controller
 {
@@ -26,14 +27,29 @@ class ChangeRegisterController extends Controller
     public function allChangeRegister()
     {
         $change_registers = collect(ChangeRegister::all())->map(function($item){
+            $item->date = Carbon::createFromFormat('Y-m-d', $item->date)->toFormattedDateString();
             $item->creator = User::find($item->creator_id)->name;
             $item->team = User::find($item->creator_id)->team->name;
-            $item->combintor = $item->combintor_id ? User::find($item->combintor_id)->name:'';
             $item->executor = $item->executor_id ? User::find($item->executor_id)->name:'';
             $item->tester = $item->tester_id ? User::find($item->tester_id)->name:'';
             return $item;
         })->all();
-        return datatables()->of($change_registers)->toJson();
+        return DataTables::of($change_registers)
+            ->addColumn('actions', function($item){
+                return '<ul class="icons-list">
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
+                                    <i class="icon-menu9"></i>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-right">
+                                    <li><a href="'.route('change_registers.edit', $item->id).'"><i class="icon-eye"></i> Xem chi tiết</a></li>
+                                    <li><a href="#"><i class="icon-file-pdf"></i> Xóa</a></li>
+                                </ul>
+                            </li>
+                        </ul>';
+            })
+            ->rawColumns(['actions'])
+            ->make(true);
     }
 
     /**
@@ -43,7 +59,8 @@ class ChangeRegisterController extends Controller
      */
     public function create()
     {
-        return view('change_registers.create');
+        $users = User::all();
+        return view('change_registers.create')->with(compact('users'));
     }
 
     /**
@@ -56,19 +73,20 @@ class ChangeRegisterController extends Controller
     {
         $this->validate($request,[
             'date'=>'required|date_format:m/d/Y',
-            'creator_id'=>'required',
-            'cr_number'=>'required',
-            'content'=>'required',
-            'purpose'=>'required',
+            'creator_id'=>'required|integer',
+            'cr_number'=>'required|string',
+            'content'=>'required|string',
+            'purpose'=>'required|string',
+            'preparer_id'=>'nullable|integer',
+            'prepare_content'=>'nullable|string',
             'combinator_id'=>'nullable|integer',
-            'combine_phone_nb'=>'nullable',
+            'combine_phone_nb'=>'nullable|string|min:10|max:11',
             'executor_id'=>'required|integer',
             'execute_content' =>'required|string',
             'tester_id'=>'nullable|integer',
-            'result'=>'nullable',
-            'note'=>'nullable',
+            'result'=>'nullable|string',
+            'note'=>'nullable|string',
         ]);
-
         $data = $request->all();
         $data['date'] = Carbon::createFromFormat('m/d/Y', $request->date)->toDateString();
         ChangeRegister::create($data);
@@ -76,16 +94,7 @@ class ChangeRegisterController extends Controller
 
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -95,7 +104,11 @@ class ChangeRegisterController extends Controller
      */
     public function edit($id)
     {
-        //
+        $data = ChangeRegister::find($id);
+        $data->creator = User::find($data->creator_id)->name;
+        $data->team = User::find($data->creator_id)->team->name;
+        $users = User::all();
+        return  view('change_registers.edit')->with(compact(['data','users']));
     }
 
     /**
@@ -107,7 +120,27 @@ class ChangeRegisterController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $change =  ChangeRegister::find($id);
+        $this->validate($request,[
+            'date'=>'required|date_format:m/d/Y',
+            'creator_id'=>'required|integer',
+            'cr_number'=>'required|string',
+            'content'=>'required|string',
+            'purpose'=>'required|string',
+            'preparer_id'=>'nullable|integer',
+            'prepare_content'=>'nullable|string',
+            'combinator_id'=>'nullable|integer',
+            'combine_phone_nb'=>'nullable|string|min:10|max:11',
+            'executor_id'=>'required|integer',
+            'execute_content' =>'required|string',
+            'tester_id'=>'nullable|integer',
+            'result'=>'nullable|string',
+            'note'=>'nullable|string',
+        ]);
+        $data = $request->all();
+        $data['date'] = Carbon::createFromFormat('m/d/Y', $request->date)->toDateString();
+        $change->update($data);
+        return redirect()->route('change_registers.index');
     }
 
     /**
