@@ -24,7 +24,7 @@ class LocalTransferController extends Controller
     public function getNodes(Request $request)
     {
         $nodes = Node::where('name', 'like', "%$request->keyWord%")
-            ->select(['id', 'name', 'manager', 'nims', 'warehouse_id'])
+            ->select(['id', 'name', 'manager', 'warehouse_id','code','shortname','nims','zone'])
             ->get();
         if(!empty($request->step1_item_id)){
             $nodes = collect($nodes)->map(function($item) use ($request){
@@ -34,6 +34,73 @@ class LocalTransferController extends Controller
 
         }
         return response()->json($nodes, 200);
+    }
+
+    public function getAssetsByNode(Request $request)
+    {
+        $warehouse = Node::find($request->node_id)->warehouse;
+        $assets = Asset::where(function ($query) use($request,$warehouse){
+            $query->where('serial', 'like', "%$request->keyWord%")
+                ->where('warehouse_id','=',$warehouse->id)
+                ->where('asset_position_id','=','3');
+        })->select(['serial', 'serial2', 'serial3', 'serial4', 'quantity', 'id','origin_qty'])
+            ->get();
+
+        if(!empty($request->selected)){
+            $assets = $this->arrayDistinguish($assets,$request->selected);
+        }
+        return response()->json($assets, 200);
+    }
+
+    private function arrayDistinguish($array1,$array2){
+        $result = $array1->map(function ($array) use ($array2){
+            $flag = false;
+            foreach ($array2 as $select){
+                if($select['id'] == $array->id) $flag = true;
+            }
+            return (!$flag) ? $array : null;
+        });
+        return $result;
+    }
+
+    public function nodeToNode(Request $request){
+        $warehouse = Node::find($request->node_destination['id'])->warehouse;
+        $assets = $request->assets;
+        foreach ($assets as $asset){
+            $tmpAsset = Asset::find($asset['id']);
+            if($asset['transfer_quantity'] > 1){
+                $childAsset = Asset::insert([
+                    'serial' => $asset['serial'],
+                    'serial2' => $asset['serial2'],
+                    'serial3' => $asset['serial3'],
+                    'serial4' => $asset['serial4'],
+                    'quantity' => $asset['transfer_quantity'],
+                    'parent_id' => $tmpAsset->id,
+                    'origin' => $tmpAsset->origin,
+                    'warranty_partner' => $tmpAsset->warranty_partner,
+                    'warranty_period' => $tmpAsset->warranty_period,
+                    'manager' => $tmpAsset->manager,
+                    'asset_type_id' => $tmpAsset->asset_type_id,
+                    'asset_position_id' => $tmpAsset->asset_position_id,
+                    'warehouse_id' => $warehouse->id,
+                    'asset_status_id' => $tmpAsset->asset_status_id,
+                    'asset_qlts_code_id' => $tmpAsset->asset_qlts_code_id,
+                    'asset_vhkt_code_id' => $tmpAsset->asset_vhkt_code_id,
+                    'origin_qty' => $tmpAsset->origin_qty,
+                    'note' => $tmpAsset->note,
+                    'user_id' => $tmpAsset->user_id,
+                    'group_id' => $tmpAsset->group_id,
+                    'indexes' => $tmpAsset->indexes,
+                    'created_at'=> now()->toDateTimeString()
+                ]);
+                $tmpAsset->quantity = (int)$tmpAsset->quantity - (int)$asset['transfer_quantity'];
+                $tmpAsset->save();
+            } else {
+                $tmpAsset->warehouse_id = $warehouse->id;
+                $tmpAsset->save();
+            }
+        }
+        return response()->json('ok',200);
     }
 
     /**
