@@ -33,6 +33,8 @@ Route::middleware('auth')->group(function(){
     Route::get('/ware-house-transfers','LocalTransferController@wareHouseTransfers')->name('local-warehouse-transfers.create');
     Route::post('ajax/warehouses','LocalTransferController@getWareHouseTransfers')->name('local-transfers.warehouses');
     Route::post('ajax/assets','LocalTransferController@getAssetByWareHouseId')->name('local-transfers.assets');
+    Route::post('/ajax/checkQuantity','LocalTransferController@checkQuantity')->name('local-transfers.quantity');
+    Route::post('/ajax/warehouse-to-node','LocalTransferController@wareHouseToNode')->name('local-transfers.warehouse-to-node');
 
     Route::get('users', 'ChangeRegisterController@users')->name('cr.users');
     Route::get('change-registers/all','ChangeRegisterController@allChangeRegister')->name('change-registers.all');

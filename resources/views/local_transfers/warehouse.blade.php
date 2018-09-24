@@ -18,16 +18,15 @@
         <form id="form_repository_transfer" action="#">
             <h6>Chọn Node đích</h6>
             <fieldset>
-                <div class="row mb-10">
+                <div class="row">
                     <div class="col-md-12">
                         <h4 class="text-center"><b>Bước 1:</b></h4>
                         <h6 class="grey-300 text-center">Chọn Node để chuyển tài sản vào</h6>
                         <div class="form-group">
-                            <label class="col-lg-1 control-label">Node<span class="text-danger">*</span></label>
-                            <div class="col-lg-11">
-                                <select data-placeholder="Chọn node..." class="select" id="nodes"></select>
-                                <h6 class="grey-300 text-center mt-10">Danh sách hiển thị là các node đã liên kết với kho dành riêng cho mỗi node. nếu không tìm thấy hãy qua <code>Quản lý node</code> để liên kết kho</h6>
-                            </div>
+                            <select data-placeholder="Chọn node..." class="select" name="nextNode" id="nodes">
+                                <option value=""></option>
+                            </select>
+                            <h6 class="grey-300 text-center mt-10">Danh sách hiển thị là các node đã liên kết với kho dành riêng cho mỗi node. nếu không tìm thấy hãy qua <code>Quản lý node</code> để liên kết kho</h6>
                         </div>
                     </div>
                 </div>
@@ -36,15 +35,14 @@
 
             <h6>Chọn kho:</h6>
             <fieldset>
-                <div class="row mb-10">
+                <div class="row">
                     <div class="col-md-12">
                         <h4 class="text-center"><b>Bước 2:</b></h4>
                         <h6 class="grey-300 text-center">Chọn kho có tài sản muốn chuyển đi</h6>
                         <div class="form-group">
-                            <label class="col-lg-1 control-label">Kho<span class="text-danger">*</span></label>
-                            <div class="col-lg-11">
-                                <select data-placeholder="Chọn kho..." class="select" id="warehouses"></select>
-                            </div>
+                            <select data-placeholder="Chọn kho..." name="currentWarehouse" class="select" id="warehouses">
+                                <option value=""></option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -52,38 +50,29 @@
 
             <h6>Chọn tài sản</h6>
             <fieldset>
-                <div class="row mb-10">
-                    <div class="col-md-12">
+                <div class="row">
+                    <div class="col-lg-12">
                         <h4 class="text-center"><b>Bước 3:</b></h4>
                         <h6 class="grey-300 text-center">Chọn tài sản muốn chuyển</h6>
                         <div class="form-group">
-                            <label class="col-lg-1 control-label">Tài sản<span class="text-danger">*</span></label>
-                            <div class="col-lg-8">
-                                <select data-placeholder="Chọn tài sản..." class="select" id="assets"></select>
+                            <div class="col-lg-10">
+                                <select data-placeholder="Chọn tài sản..." class="select" id="assets">
+                                    <option value=""></option>
+                                </select>
                             </div>
-                            <label class="col-lg-1 control-label">Số lượng<span class="text-danger">*</span></label>
-                            <div class="col-lg-1">
-                                <input type="nunber" class="form-control" id="quantity">
-                            </div>
-                            <div class="col-lg-1">
-                                <button type="button" class="btn btn-success btn-block" id="add-asset">Add</button>
+                            <div class="col-lg-2">
+                                <input type="number" id="quantity" class="form-control" placeholder="Số lượng">
                             </div>
                         </div>
+                    </div>
+                    <div class="col-lg-12 text-center mt-20">
                         <div class="form-group">
-                            <div class="col-lg-12">
-                                <div class="panel panel-flat">
-                                    <div class="table-responsive pre-scrollable">
-                                        <table class="table" id="asset_selected">
-                                            <thead>
-                                            <tr>
-                                                <th>Thông tin chi tiết</th>
-                                                <th>Action</th>
-                                            </tr>
-                                            </thead>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
+                            <button type="button" class="btn btn-primary btn-sm" id="add-asset">Add to list</button>
+                        </div>
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="panel panel-flat p-10">
+                            <ul class="media-list media-list-linked" id="asset-list"></ul>
                         </div>
                     </div>
                 </div>
@@ -92,7 +81,24 @@
             <h6>Xem lại</h6>
             <fieldset>
                 <div class="row">
-
+                    <div class="col-lg-12">
+                        <label for="">Node</label>
+                        <table class="table table-togglable table-hover" id="node-warehouse">
+                        </table>
+                    </div>
+                    <div class="col-lg-12">
+                        <label>Tài sản</label>
+                        <table class="table table-togglable table-hover" id="asset-list-detail">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Tài sản</th>
+                                    <th>Số lượng</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
                 </div>
             </fieldset>
         </form>
@@ -100,8 +106,33 @@
 @endsection
 @section('custom_js')
     <script>
+        let assetList = [], nextNode = {}, currentWarehouse = {};
         let status = false;
         let form = $('#form_repository_transfer');
+        function review(){
+            let nw= $('#node-warehouse');
+            nw.append(
+                `<tr>
+                    <th>Node đích</th>
+                    <td>${nextNode.name} / ${nextNode.nims} / ${nextNode.manager}</td>
+                </tr>`
+            );
+            nw.append(
+                `<tr>
+                    <th>Kho chuyển</th>
+                    <td>${currentWarehouse.name} / ${currentWarehouse.code}</td>
+                </tr>`
+            );
+            for(let t of assetList){
+                $('#asset-list-detail tbody').append(`
+                    <tr>
+                        <td>${t.id}</td>
+                        <td>${t.serial} // ${t.name}</td>
+                        <td>${t.newQuantity}</td>
+                    </tr>
+                `);
+            }
+        }
         form.steps({
             headerTag: "h6",
             bodyTag: "fieldset",
@@ -110,26 +141,80 @@
             autoFocus: true,
             onStepChanging: function (event, currentIndex, newIndex) {
                 let node1 = $('#nodes');
-                if(node1.val() == null){
-                    $.jGrowl('Vui lòng chọn node để chuyển tài sản', {
-                        header: 'Có lỗi xảy ra',
-                        theme: 'bg-danger'
-                    });
-                }else{
-                    if(!status) $.jGrowl('Hệ thống đang bị lỗi rất nghiêm trọng: Node không có kho chứa tài sản. Đề nghị liên hệ System Admin', {
-                        header: 'Lỗi nghiêm trọng',
-                        theme: 'bg-danger'
-                    });
-                    else return $(event.target).show().valid();
+                let warehouse =  $('#warehouses');
+                if(newIndex === 3){
+                    review();
+                }
+                switch (currentIndex) {
+                    case 0:{
+                        if(node1.val() == null || node1.val() === ""){
+                            $.jGrowl('Vui lòng chọn node để chuyển tài sản', {
+                                header: 'Có lỗi xảy ra',
+                                theme: 'bg-danger'
+                            });
+                        }else{
+                            if(!status) $.jGrowl('Hệ thống đang bị lỗi rất nghiêm trọng: Node không có kho chứa tài sản. Đề nghị liên hệ System Admin', {
+                                header: 'Lỗi nghiêm trọng',
+                                theme: 'bg-danger'
+                            });
+                            else {
+                                nextNode = node1.select2('data')[0].data;
+                                return $(event.target).show().valid();
+                            }
+                        }
+                        break;
+                    }
+                    case 1:{
+                        if(warehouse.val() == null || warehouse.val() === ""){
+                            $.jGrowl('Vui lòng chọn kho để chuyển tài sản đi', {
+                                header: 'Có lỗi xảy ra',
+                                theme: 'bg-danger'
+                            });
+                        }else{
+                            currentWarehouse = warehouse.select2('data')[0].data;
+                            return $(event.target).show().valid();
+                        }
+                        break;
+                    }
+                    case 2:{
+                        if(assetList.length <= 0){
+                            $.jGrowl('Vui lòng chọn vật tư cần chuyển đi', {
+                                header: 'Có lỗi xảy ra',
+                                theme: 'bg-danger'
+                            });
+                        }else{
+                            return $(event.target).show().valid();
+                        }
+                        break;
+                    }
+                    default:{
+                        return $(event.target).show().valid();
+                    }
                 }
             },
-            onStepChanged: function (event, currentIndex, priorIndex) {
-            },
             onFinishing: function (event, currentIndex) {
+                $.ajax({
+                    url: '{{ route('local-transfers.warehouse-to-node') }}',
+                    headers: {'X-CSRF-Token': $('input[name="_token"]').attr('value')},
+                    method: 'POST',
+                    data:{
+                        currentWarehouse: currentWarehouse,
+                        nextNode: nextNode,
+                        assetList: assetList,
+                    }
+                }).done((e)=>{
+                    $.jGrowl('Điều chuyển tài sản thành công !!', {
+                        header: 'Lỗi nghiêm trọng',
+                        theme: 'bg-success'
+                    });
+                });
+                return $(event.target).show().valid();
             },
             onFinished: function (event, currentIndex) {
+                location.reload();
             }
         });
+        //step 1
         $('#nodes').select2({
             minimumInputLength: 0,
             ajax: {
@@ -163,6 +248,7 @@
                 });
             }
         });
+        //step 2
         $('#warehouses').select2({
             minimumInputLength: 0,
             ajax: {
@@ -172,7 +258,7 @@
                 dataType: 'json',
                 data: function (params) {
                     return {
-                        keyword: params.term
+                        keyword: params.term,
                     };
                 },
                 processResults: function (data, params) {
@@ -187,9 +273,8 @@
                     };
                 }
             }
-        }).on('select2:select', (e)=>{
-            sessionStorage.setItem('warehouse_id',e.params.data.data.id);
         });
+        //step 3
         $('#assets').select2({
             ajax: {
                 url: '{{ route('local-transfers.assets') }}',
@@ -198,11 +283,11 @@
                 dataType: 'json',
                 data: function () {
                     return {
-                        warehouse_id: sessionStorage.getItem('warehouse_id')
+                        warehouse_id: currentWarehouse.id,
+                        excepts: assetList
                     };
                 },
                 processResults: function (data, params) {
-                    console.log(data);
                     return {
                         results: $.map(data, function (item) {
                             return {
@@ -215,17 +300,52 @@
                 }
             }
         }).on('select2:select',(e)=>{
-            let data = e.params.data.data;
-            $('#add-asset').on('click', (e)=>{
-                data.quantity = $('#quantity').val();
-                $('#assets').val('');
-                $('#quantity').val('');
-                addRow(data);
-            });
+            $('#quantity').val(e.params.data.data.quantity);
         });
-        function addRow(data){
-            let  row = `<tr><td>Tên: ${data.name} // Serial: ${data.serial} // Serial2: ${data.serial2} // Số lượng: ${data.quantity} </td><td><button class="btn btn-dannger remove">Remove</button></td></tr>`;
-            $('#asset_selected').append(row);
-        }
+
+        //add asset to list
+        $('#add-asset').click((e)=>{
+            e.preventDefault();
+            let qty = $('#quantity');
+            let quantity = qty.val();
+            if(quantity > 0 && quantity != null){
+                qty.val('');
+                let data = $('#assets').select2('data')[0].data;
+                data.newQuantity = quantity;
+                assetList.push(data);
+                $('#asset-list').append(`<li class="media">
+                                            <div class="media-body">
+                                                Tên: ${data.name} || ${data.serial} || ${data.serial2} - Số lượng: ${quantity}
+                                            </div>
+                                         </li>`);
+            }else{
+                $.jGrowl('Vui lòng nhập số lượng chuyển đi lớn 0', {
+                    header: 'Có lỗi xảy ra',
+                    theme: 'bg-danger'
+                });
+            }
+        });
+        // check quantity
+        $('#quantity').keyup((e)=>{
+            let btn = $('#add-asset');
+            btn.attr('disabled',true);
+            let data = $('#assets').select2('data')[0].data;
+            $.ajax({
+                url: '{{ route('local-transfers.quantity') }}',
+                headers: {'X-CSRF-Token': $('input[name="_token"]').attr('value')},
+                method:'POST',
+                data:{ id: data.id, quantity: $(e.target).val() }
+            }).done((res)=>{
+                btn.attr('disabled',true);
+                if(!res.status){
+                    $.jGrowl(res.message, {
+                        header: 'Có lỗi xảy ra',
+                        theme: 'bg-danger'
+                    });
+                }else{
+                    $('#add-asset').attr('disabled',false);
+                }
+            }).always((e)=>{});
+        });
     </script>
 @endsection
