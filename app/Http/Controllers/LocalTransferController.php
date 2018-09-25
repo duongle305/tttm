@@ -87,7 +87,7 @@ class LocalTransferController extends Controller
         $assets = $request->assetList;
         foreach ($assets as $asset){
             $asset = (object) $asset;
-            if($asset->origin_qty <= 1){
+            if($asset->origin_qty == 1){
                 $as = Asset::find($asset->id);
                 $as->warehouse_id = $nextWareHouse->warehouse_id;
                 $as->save();
