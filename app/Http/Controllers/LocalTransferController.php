@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Asset;
+use App\AssetQltsCode;
 use App\Node;
 use App\WareHouse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class LocalTransferController extends Controller
 {
@@ -23,15 +25,16 @@ class LocalTransferController extends Controller
 
     public function getNodes(Request $request)
     {
-        $nodes = Node::where('name', 'like', "%$request->keyWord%")
-            ->select(['id', 'name', 'manager', 'warehouse_id','code','shortname','nims','zone'])
+        $nodes = DB::table('nodes')
+            ->leftJoin('rooms','nodes.room_id','=','rooms.id')
+            ->where('nodes.name', 'like', "%$request->keyWord%")
+            ->select(['nodes.id as id', 'nodes.name', 'nodes.manager', 'nodes.warehouse_id','nodes.code','nodes.shortname','nodes.nims','nodes.zone','rooms.name as room_name'])
             ->get();
         if(!empty($request->step1_item_id)){
             $nodes = collect($nodes)->map(function($item) use ($request){
                 if($item->id == $request->step1_item_id) unset($item);
                 else return $item;
             })->all();
-
         }
         return response()->json($nodes, 200);
     }
@@ -39,28 +42,33 @@ class LocalTransferController extends Controller
     public function getAssetsByNode(Request $request)
     {
         $warehouse_id = $request->node['warehouse_id'];
-        $assets = Asset::where(function ($query) use($request,$warehouse_id){
-            $query->where('serial', 'like', "%$request->keyWord%")
-                ->where('warehouse_id','=',$warehouse_id)
-                ->where('asset_position_id','=','3');
-        })->select(['serial', 'serial2', 'serial3', 'serial4', 'quantity', 'id','origin_qty'])
-            ->get();
 
+        $assets = DB::table('assets')
+            ->leftJoin('asset_qlts_codes','assets.asset_qlts_code_id','=','asset_qlts_codes.id')
+            ->leftJoin('asset_vhkt_codes','assets.asset_vhkt_code_id','=','asset_vhkt_codes.id')
+            ->leftJoin('warehouses','assets.warehouse_id','=','warehouses.id')
+            ->leftJoin('vendors','vendors.id','=','asset_qlts_codes.vendor_id')
+            ->where(function ($query) use($request,$warehouse_id) {
+                $query->where('serial', 'like', "%$request->keyWord%")
+                    ->where('warehouse_id', '=', $warehouse_id)
+                    ->where('asset_position_id', '=', '3');
+            })
+            ->select(['assets.id as id','quantity','origin_qty','asset_qlts_codes.name as asset_name','warehouses.name as warehouse_name','asset_qlts_codes.code as qlts_code','asset_vhkt_codes.code as vhkt_code','vendors.name as vendor_name'])
+            ->get();
         if(!empty($request->selected)){
-            $assets = $this->arrayDistinguish($assets,$request->selected);
+            $assets = $assets->map(function ($asset) use ($request){
+                $flag = false;
+                foreach ($request->selected as $select){
+                    if($select['id'] == $asset->id) {
+                        $flag = true;
+                        break;
+                    }
+                }
+                if($flag) return null;
+                return $asset;
+            });
         }
         return response()->json($assets, 200);
-    }
-
-    private function arrayDistinguish($array1,$array2){
-        $result = $array1->map(function ($array) use ($array2){
-            $flag = false;
-            foreach ($array2 as $select){
-                if($select['id'] == $array->id) $flag = true;
-            }
-            return (!$flag) ? $array : null;
-        });
-        return $result;
     }
 
     public function nodeToNode(Request $request){
@@ -130,10 +138,10 @@ class LocalTransferController extends Controller
         if($request->warehouse_id == null) return [];
         $excepts = collect($request->excepts)->map(function($item){ return $item['id']; });
         $assets = Asset::where('warehouse_id',$request->warehouse_id)
-            ->with(['qlts_code'])
+            ->with(['qltsCode'])
             ->get();
         $assets = collect($assets)->mapWithKeys(function($item){
-            $item->name = $item->qlts_code->name;
+            $item->name = $item->qltsCode->name;
             return [$item->id => $item];
         })->except($excepts)->all();
         return response()->json($assets, 200);
