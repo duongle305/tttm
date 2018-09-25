@@ -38,10 +38,10 @@ class LocalTransferController extends Controller
 
     public function getAssetsByNode(Request $request)
     {
-        $warehouse = Node::find($request->node_id)->warehouse;
-        $assets = Asset::where(function ($query) use($request,$warehouse){
+        $warehouse_id = $request->node['warehouse_id'];
+        $assets = Asset::where(function ($query) use($request,$warehouse_id){
             $query->where('serial', 'like', "%$request->keyWord%")
-                ->where('warehouse_id','=',$warehouse->id)
+                ->where('warehouse_id','=',$warehouse_id)
                 ->where('asset_position_id','=','3');
         })->select(['serial', 'serial2', 'serial3', 'serial4', 'quantity', 'id','origin_qty'])
             ->get();

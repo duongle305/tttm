@@ -77,10 +77,10 @@
                                 </div>
                             </div>
                             <div class="col-md-3">
-                                <div class="form-group" id="quantity_input">
+                                <div class="form-group" id="quantity_input" style="display: none;">
                                     <label>Số lượng điều chuyển<span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control required" id="step3_input_quantity">
-                                    <div id="step3_input_quantity_show_error"></div>
+                                    <input type="text" class="form-control" id="step3_input_quantity">
+                                    <div id="step3_input_quantity_error_show"></div>
                                 </div>
                             </div>
                         </div>
@@ -108,8 +108,7 @@
                             <div class="form-group mt-20">
                                 <div class="col-md-12">
                                     <label>Các tài sản sẽ chuyển sang node mới</label>
-                                    <textarea rows="6" cols="5" class="form-control" readonly
-                                              id="list_assets_selected"></textarea>
+                                    <textarea rows="6" cols="5" class="form-control" readonly id="list_assets_selected"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -209,7 +208,7 @@
                     if (currentIndex > newIndex) {
                         return true;
                     }
-                    if (currentIndex == 2 && assets_selected.length == 0) {
+                    if(currentIndex == 2 && assets_selected.length == 0){
                         $('#step3_show_selected_error').html('<label class="validation-error-label">Bạn chưa chọn tài sản</label>');
                         return false;
                     }
@@ -243,13 +242,13 @@
                                     header: 'Thành công!',
                                     theme: 'bg-success'
                                 });
-                                $(event.target.lastChild.lastChild.lastChild.lastChild).attr('href', 'javascript:void(0)');
+                                $(event.target.lastChild.lastChild.lastChild.lastChild).attr('href','javascript:void(0)');
                                 setTimeout(function () {
                                     location.reload();
-                                }, 2000);
+                                },2000);
                             }
                         },
-                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        error: function(XMLHttpRequest, textStatus, errorThrown) {
                             $.jGrowl('Có lỗi xảy ra', {
                                 header: 'Điều chuyển không thành công!',
                                 theme: 'bg-danger'
@@ -395,12 +394,12 @@
                         if (assets_selected.length != 0) {
                             return {
                                 selected: assets_selected,
-                                node_id: node_transfer.id,
+                                node: node_transfer,
                                 keyWord: params.term
                             };
                         } else {
                             return {
-                                node_id: localStorage.getItem('step2'),
+                                node: node_transfer,
                                 keyWord: params.term
                             }
                         }
@@ -421,8 +420,8 @@
 
             $('#step_3_select').on('select2:select', (e) => {
                 $('#step3_add_select').removeAttr('disabled');
-                $('#step3_show_selected_error').html('');
                 tmp = e.params.data.data;
+                $('#step3_show_selected_error').html('');
                 if (parseInt(e.params.data.data.quantity) == 1) {
                     $('#quantity_input').hide();
                 } else {
@@ -431,14 +430,14 @@
             });
 
             $('#step3_input_quantity').keyup((event) => {
-                if (!isNaN($(event.currentTarget).val())) {
-                    if (parseInt($(event.currentTarget).val()) > tmp.quantity) {
-                        $('#input_error_alert').html('<label class="validation-error-label">Số lượng không được vượt quá số lượng hiện tại</label>')
-                    } else {
-                        $('#input_error_alert').html('');
-                    }
+                if (isNaN($(event.currentTarget).val())) {
+                    $('#step3_input_quantity_error_show').html('<label class="validation-error-label">Vui lòng nhập số</label>')
+                } else if($(event.currentTarget).val() == ''){
+                    $('#step3_input_quantity_error_show').html('<label class="validation-error-label">Số lượng không được để trống</label>')
+                } else if (parseInt($(event.currentTarget).val()) > tmp.quantity) {
+                    $('#step3_input_quantity_error_show').html('<label class="validation-error-label">Số lượng không được vượt quá số lượng hiện tại</label>')
                 } else {
-                    $('#input_error_alert').html('<label class="validation-error-label">Vui lòng nhập số</label>')
+                    $('#step3_input_quantity_error_show').html('')
                 }
             });
 
@@ -446,16 +445,16 @@
                 if (jQuery.isEmptyObject(tmp)) {
                     $('#step3_show_selected_error').html('<label class="validation-error-label">Bạn chưa chọn tài sản</label>');
                     return false;
-                } else {
-                    if (tmp.quantity > 1 && $('#step3_input_quantity').val() == '') {
-                        $('#step3_input_quantity_show_error').html('<label class="validation-error-label">Bạn chưa nhập số lượng</label>');
-                        return false;
-                    } else $('#step3_input_quantity_show_error').html('')
+                } else if (tmp.quantity > 1 && $('#step3_input_quantity').val() == '') {
+                    $('#step3_input_quantity_error_show').html('<label class="validation-error-label">Bạn chưa nhập số lượng</label>');
+                    return false;
                 }
-                $('#step3_show_selected_error').text('');
-                $('#step3_input_quantity_show_error').text('');
+                $('#step3_show_selected_error').html('');
+                $('#step3_input_quantity_error_show').html('');
+                $('#quantity_input').hide();
                 (tmp.quantity == 1) ? tmp.transfer_quantity = 1 : tmp.transfer_quantity = $('#step3_input_quantity').val();
                 assets_selected.push(tmp);
+                console.log(assets_selected);
                 tmp = null;
                 step3ShowSelected();
                 step4ShowSelected();
