@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateAssetTempTransfers extends Migration
+    class CreateAssetTempTransfers extends Migration
 {
     /**
      * Run the migrations.
@@ -21,6 +21,7 @@ class CreateAssetTempTransfers extends Migration
             $table->foreign('current_warehouse_id')->references('id')->on('warehouses')->onDelete('cascade');
             $table->unsignedInteger('next_warehouse_id');
             $table->foreign('next_warehouse_id')->references('id')->on('warehouses')->onDelete('cascade');
+            $table->unsignedInteger('quantity');
             $table->unsignedInteger('user_id')->nullable();
             $table->unsignedInteger('group_id')->nullable();
             $table->timestamps();

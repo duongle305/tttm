@@ -240,6 +240,7 @@
                 },
 
                 onFinished: function (event, currentIndex) {
+
                     $.ajax({
                         headers: {'X-CSRF-Token': $('input[name="_token"]').attr('value')},
                         url: "/ajax/node-to-manager/submit",

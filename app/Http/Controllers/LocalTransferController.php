@@ -52,9 +52,11 @@ class LocalTransferController extends Controller
             ->where(function ($query) use($request,$warehouse_id) {
                 $query->where('asset_qlts_codes.name', 'like', "%$request->keyWord%")
                     ->where('warehouse_id', '=', $warehouse_id)
-                    ->where('asset_position_id', '=', $request->asset_position_id);
-            })
-            ->select(['assets.id as id','quantity','origin_qty','asset_qlts_codes.name as asset_name','warehouses.name as warehouse_name','warehouses.id as warehouse_id','asset_qlts_codes.code as qlts_code','asset_vhkt_codes.code as vhkt_code','vendors.name as vendor_name'])
+                    ->where('asset_position_id', '=', $request->asset_position_id)
+                    ->whereNotIn('assets.id',function($query) {
+                        $query->select('asset_id')->from('asset_temp_transfers');
+                    });
+            })->select(['assets.id as id','quantity','origin_qty','asset_qlts_codes.name as asset_name','warehouses.name as warehouse_name','warehouses.id as warehouse_id','asset_qlts_codes.code as qlts_code','asset_vhkt_codes.code as vhkt_code','vendors.name as vendor_name'])
             ->get();
 
         if(!empty($request->selected)){
@@ -265,11 +267,13 @@ class LocalTransferController extends Controller
         $manager = $request->manager;
         $nodeTransfer = $request->node_transfer;
         $assets = $request->assets;
+
         foreach ($assets as $asset){
             $assetTmpTransfer = AssetTempTransfer::create([
                 'asset_id' => $asset['id'],
                 'current_warehouse_id' => $asset['warehouse_id'],
                 'next_warehouse_id' => $manager['warehouse_id'],
+                'quantity' => $asset['transfer_quantity']
             ]);
         }
 
