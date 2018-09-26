@@ -32,13 +32,16 @@ Route::middleware('auth')->group(function(){
     Route::post('ajax/get-assets-by-node','LocalTransferController@getAssetsByNode')->name('local-transfers.assets');
     Route::post('ajax/node-to-node','LocalTransferController@nodeToNode')->name('local-transfers.assets.submit');
 
+    Route::get('transfer-node-to-manager','LocalTransferController@nodeToManager')->name('local-transfers.node-to-manager');
+    Route::post('ajax/node-to-manager/get-node','LocalTransferController@getNodeAfterManagerSelected')->name('local-transfers.node-to-manager.get-node');
+    Route::post('ajax/node-to-manager/submit','LocalTransferController@nodeToManagerSubmit')->name('local-transfers.node-to-manager.submit');
+
     //repository transfers
     Route::get('ware-house-transfers','LocalTransferController@wareHouseTransfers')->name('local-warehouse-transfers.create');
     Route::post('ajax/warehouses','LocalTransferController@getWareHouseTransfers')->name('local-transfers.warehouses');
     Route::post('ajax/assets','LocalTransferController@getAssetByWareHouseId')->name('local-transfers.assets');
     Route::post('ajax/checkQuantity','LocalTransferController@checkQuantity')->name('local-transfers.quantity');
     Route::post('ajax/warehouse-to-node','LocalTransferController@wareHouseToNode')->name('local-transfers.warehouse-to-node');
-
     // manager transfers
     Route::get('manager-transfers', 'LocalTransferController@showFormManagerTransfer')->name('local-manager-transfers.create');
     Route::post('manager-transfers/managers', 'LocalTransferController@getManagers')->name('local-manager-transfers.managers');
