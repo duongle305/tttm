@@ -89,7 +89,7 @@
                         </div>
                         {{ csrf_field() }}
                         <div class="form-group has-feedback has-feedback-left">
-                            <input type="text" name="email" class="form-control" placeholder="Email">
+                            <input type="text" name="username" class="form-control" placeholder="Username">
                             <div class="form-control-feedback">
                                 <i class="icon-user text-muted"></i>
                             </div>
@@ -108,7 +108,7 @@
                     </div>
                 </form>
                 <!-- /simple login form -->
-
+                {{ print_r($errors) }}
 
                 <!-- Footer -->
                 <div class="footer text-muted text-center">

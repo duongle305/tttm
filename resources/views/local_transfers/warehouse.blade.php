@@ -23,9 +23,7 @@
                         <h4 class="text-center"><b>Bước 1:</b></h4>
                         <h6 class="grey-300 text-center">Chọn Node để chuyển tài sản vào</h6>
                         <div class="form-group">
-                            <select data-placeholder="Chọn node..." class="select" name="nextNode" id="nodes">
-                                <option value=""></option>
-                            </select>
+                            <select data-placeholder="Chọn node..." class="select" name="nextNode" id="nodes"> </select>
                             <h6 class="grey-300 text-center mt-10">Danh sách hiển thị là các node đã liên kết với kho dành riêng cho mỗi node. nếu không tìm thấy hãy qua <code>Quản lý node</code> để liên kết kho</h6>
                         </div>
                     </div>
