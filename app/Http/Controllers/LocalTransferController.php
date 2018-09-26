@@ -78,10 +78,10 @@ class LocalTransferController extends Controller
             $tmpAsset = Asset::find($asset['id']);
             if($asset['transfer_quantity'] > 1){
                 $childAsset = Asset::insert([
-                    'serial' => $asset['serial'],
-                    'serial2' => $asset['serial2'],
-                    'serial3' => $asset['serial3'],
-                    'serial4' => $asset['serial4'],
+                    'serial' => $tmpAsset->serial,
+                    'serial2' => $tmpAsset->serial2,
+                    'serial3' => $tmpAsset->serial3,
+                    'serial4' => $tmpAsset->serial4,
                     'quantity' => $asset['transfer_quantity'],
                     'parent_id' => $tmpAsset->id,
                     'origin' => $tmpAsset->origin,
