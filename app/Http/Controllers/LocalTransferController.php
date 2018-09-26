@@ -98,8 +98,7 @@ class LocalTransferController extends Controller
                     'note' => $tmpAsset->note,
                     'user_id' => $tmpAsset->user_id,
                     'group_id' => $tmpAsset->group_id,
-                    'indexes' => $tmpAsset->indexes,
-                    'created_at'=> now()->toDateTimeString()
+                    'indexes' => $tmpAsset->indexes
                 ]);
                 $tmpAsset->quantity = (int)$tmpAsset->quantity - (int)$asset['transfer_quantity'];
                 $tmpAsset->save();
