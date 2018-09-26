@@ -220,12 +220,14 @@ class LocalTransferController extends Controller
         return response()->json($users, 200);
     }
 
-    public function getAssets(){
+    public function getAssets(Request $request){
         $user = auth()->user();
+        $asset_id = empty($request->asset_id)?[]:$request->asset_id;
         $assets = DB::table('assets')->where('warehouse_id',$user->warehouse_id)
             ->join('asset_qlts_codes','assets.asset_qlts_code_id','=','asset_qlts_codes.id')
             ->join('vendors','asset_qlts_codes.vendor_id','=','vendors.id')
             ->select('assets.id','assets.serial','assets.quantity','assets.origin_qty','asset_qlts_codes.name','asset_qlts_codes.code as qlts_code','vendors.name as vendor_name')
+            ->whereNotIn('assets.id',$asset_id)
             ->get();
         return response()->json($assets,200);
     }
@@ -242,7 +244,8 @@ class LocalTransferController extends Controller
         return view('local_transfers.manager')->with(compact('users'));
     }
     public function managerTransfers(Request $request){
-        
+        $manager = User::find($request->manager_id);
+        $asset = $request->assets;
     }
 
 }
