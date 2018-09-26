@@ -14,8 +14,12 @@ class Asset extends Model
         return $this->belongsTo('App\Warehouse','warehouse_id','id');
     }
 
-    public function qlts_code()
+    public function qltsCode()
     {
-        return $this->belongsTo('App\AssetQltsCode','asset_qlts_code_id');
+        return $this->hasOne('App\AssetQltsCode','id');
+    }
+
+    public function vhktCode(){
+        return $this->hasOne('App\AssetVhktCode','id');
     }
 }

@@ -28,8 +28,9 @@
                         <div class="form-group">
                             <label class="col-lg-1 control-label">Node<span class="text-danger">*</span></label>
                             <div class="col-lg-11">
-                                <select data-placeholder="Chọn node..." class="select required"
+                                <select data-placeholder="Chọn node..." class="select"
                                         id="step_1_select"></select>
+                                <div id="step1_error_show"></div>
                                 <h6 class="grey-300 text-center mt-10">Danh sách hiển thị là các node đã liên kết với
                                     kho dành riêng cho mỗi node. nếu không tìm thấy hãy qua <code>Quản lý node</code> để
                                     liên kết kho</h6>
@@ -48,9 +49,10 @@
                         <div class="form-group">
                             <label class="col-lg-1 control-label">Node<span class="text-danger">*</span></label>
                             <div class="col-lg-11">
-                                <select data-placeholder="Chọn node..." class="select required" id="step_2_select">
+                                <select data-placeholder="Chọn node..." class="select" id="step_2_select">
                                     <option></option>
                                 </select>
+                                <div id="step2_error_show"></div>
                                 <h6 class="grey-300 text-center mt-10">Danh sách hiển thị là các node đã liên kết với
                                     kho dành riêng cho mỗi node. nếu không tìm thấy hãy qua <code>Quản lý node</code> để
                                     liên kết kho</h6>
@@ -190,9 +192,11 @@
 @section('custom_js')
     <script>
         $(document).ready(function () {
+            var step1Status = false;
+            var step2Status = false;
+            var step3Status = false;
             var node_transfer = null;
             var node_destination = null;
-            var i = 1;
             var assets_selected = [];
             var tmp = null;
 
@@ -208,8 +212,27 @@
                     if (currentIndex > newIndex) {
                         return true;
                     }
+
+                    if(currentIndex == 0 && !node_destination){
+                        $('#step1_error_show').html('<label class="validation-error-label">Bạn chưa chọn node đích</label>');
+                        return false;
+                    }
+                    if(currentIndex == 0 && !step1Status){
+                        return false;
+                    }
+                    if(currentIndex == 1 && !node_transfer){
+                        $('#step2_error_show').html('<label class="validation-error-label">Bạn chưa chọn node đầu</label>');
+                        return false;
+                    }
+                    if(currentIndex == 1 && !step2Status){
+                        return false;
+                    }
+
                     if(currentIndex == 2 && assets_selected.length == 0){
                         $('#step3_show_selected_error').html('<label class="validation-error-label">Bạn chưa chọn tài sản</label>');
+                        return false;
+                    }
+                    if(currentIndex == 2 && !step3Status){
                         return false;
                     }
 
@@ -322,7 +345,7 @@
                         return {
                             results: $.map(data, function (item) {
                                 return {
-                                    text: `${item.name} | ${item.manager}`,
+                                    text: `Tên: ${item.name} |-Quản lý: ${item.manager} |- ${item.room_name}`,
                                     id: item.id,
                                     data: item
                                 };
@@ -338,9 +361,15 @@
                         header: 'Nguy hiểm!',
                         theme: 'bg-danger'
                     });
+                    $('#step1_error_show').html('');
+                    $('#step_1_select').val(null).trigger('change');
+                    node_destination = null;
+                    step1Status = false;
                 } else {
                     node_destination = e.params.data.data;
-                    step4ShowNode(node_destination, $('#step4_show_node_destination'))
+                    step4ShowNode(node_destination, $('#step4_show_node_destination'));
+                    $('#step1_error_show').html('');
+                    step1Status = true;
                 }
             });
 
@@ -361,7 +390,7 @@
                         return {
                             results: $.map(data, function (item) {
                                 if (item != null) return {
-                                    text: `${item.name} | ${item.manager}`,
+                                    text: `Tên: ${item.name} |-Quản lý: ${item.manager} |- ${item.room_name}`,
                                     id: item.id,
                                     data: item
                                 };
@@ -377,9 +406,15 @@
                         header: 'Nguy hiểm!',
                         theme: 'bg-danger'
                     });
+                    $('#step2_error_show').html('');
+                    $('#step_2_select').val(null).trigger('change');
+                    node_transfer = null;
+                    step2Status = false;
                 } else {
+                    step2Status = true;
                     node_transfer = e.params.data.data;
-                    step4ShowNode(node_transfer, $('#step4_show_node_transfer'))
+                    step4ShowNode(node_transfer, $('#step4_show_node_transfer'));
+                    $('#step2_error_show').html('');
                 }
             });
 
@@ -408,7 +443,7 @@
                         return {
                             results: $.map(data, function (item) {
                                 if (item != null) return {
-                                    text: `Serial: ${item.serial} |-Serial2: ${item.serial2} |-Serial3: ${item.serial3} |Serial4: ${item.serial4} | Số lượng hiện có: ${item.quantity}`,
+                                    text: `Tên: ${item.asset_name} |-Số lượng hiện có: ${item.quantity} |-Kho: ${item.warehouse_name} |-Vendor: ${item.vendor_name} |-Mã QLTS: ${item.qlts_code} |-Mã VHKT: ${item.vhkt_code}`,
                                     id: item.id,
                                     data: item
                                 };
@@ -422,6 +457,7 @@
                 $('#step3_add_select').removeAttr('disabled');
                 tmp = e.params.data.data;
                 $('#step3_show_selected_error').html('');
+                step3Status = true;
                 if (parseInt(e.params.data.data.quantity) == 1) {
                     $('#quantity_input').hide();
                 } else {
@@ -431,13 +467,17 @@
 
             $('#step3_input_quantity').keyup((event) => {
                 if (isNaN($(event.currentTarget).val())) {
-                    $('#step3_input_quantity_error_show').html('<label class="validation-error-label">Vui lòng nhập số</label>')
+                    $('#step3_input_quantity_error_show').html('<label class="validation-error-label">Vui lòng nhập số</label>');
+                    step3Status = false;
                 } else if($(event.currentTarget).val() == ''){
                     $('#step3_input_quantity_error_show').html('<label class="validation-error-label">Số lượng không được để trống</label>')
+                    step3Status = false;
                 } else if (parseInt($(event.currentTarget).val()) > tmp.quantity) {
                     $('#step3_input_quantity_error_show').html('<label class="validation-error-label">Số lượng không được vượt quá số lượng hiện tại</label>')
+                    step3Status = false;
                 } else {
-                    $('#step3_input_quantity_error_show').html('')
+                    $('#step3_input_quantity_error_show').html('');
+                    step3Status = true;
                 }
             });
 
@@ -448,13 +488,13 @@
                 } else if (tmp.quantity > 1 && $('#step3_input_quantity').val() == '') {
                     $('#step3_input_quantity_error_show').html('<label class="validation-error-label">Bạn chưa nhập số lượng</label>');
                     return false;
-                }
+                } else if (!step3Status) return false;
+
                 $('#step3_show_selected_error').html('');
                 $('#step3_input_quantity_error_show').html('');
                 $('#quantity_input').hide();
                 (tmp.quantity == 1) ? tmp.transfer_quantity = 1 : tmp.transfer_quantity = $('#step3_input_quantity').val();
                 assets_selected.push(tmp);
-                console.log(assets_selected);
                 tmp = null;
                 step3ShowSelected();
                 step4ShowSelected();
@@ -474,7 +514,7 @@
                     html += `<tr>
                             <td>${index}</td>
                             <td>${data.id}</td>
-                            <td>${data.serial}</td>
+                            <td>${data.asset_name}</td>
                             <td>${data.quantity}</td>
                             <td>${data.transfer_quantity}</td>
                         </tr>`;
@@ -486,7 +526,7 @@
             function step3ShowSelected() {
                 let html = "";
                 assets_selected.forEach((data) => {
-                    html += `Số lượng điều chuyển: ${data.transfer_quantity} // Serial: ${data.serial} |-Serial2: ${data.serial2} |-Serial3 ${data.serial3} |-Serial4: ${data.serial4} |-Số lượng hiện có  ${data.quantity}|\n`;
+                        html += `- Số lượng điều chuyển: ${data.transfer_quantity} // ${data.asset_name} |-Số lượng hiện có: ${data.quantity} |-Kho: ${data.warehouse_name} |-Vendor: ${data.vendor_name} |-Mã QLTS: ${data.qlts_code} |-Mã VHKT: ${data.vhkt_code}\n`;
                 });
                 $('#list_assets_selected').val(html);
                 $('#step_3_select').val(null).trigger('change');
@@ -499,7 +539,7 @@
                             <td>${(node.code == null) ? '' : node.code}</td>
                             <td>${(node.shortname == null) ? '' : node.shortname}</td>
                             <td>${(node.nims == null) ? '' : node.nims}</td>
-                            <td>${(node.zone == null) ? '' : node.zone}</td>
+                            <td>${(node.room_name == null) ? '' : node.room_name}</td>
                         </tr>`;
 
                 $(elelement).html(html);
