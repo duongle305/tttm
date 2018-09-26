@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Asset;
 use App\AssetQltsCode;
+use App\AssetTempTransfer;
 use App\Node;
 use App\User;
 use App\WareHouse;
@@ -43,19 +44,19 @@ class LocalTransferController extends Controller
     public function getAssetsByNode(Request $request)
     {
         $warehouse_id = $request->node['warehouse_id'];
-
         $assets = DB::table('assets')
             ->leftJoin('asset_qlts_codes','assets.asset_qlts_code_id','=','asset_qlts_codes.id')
             ->leftJoin('asset_vhkt_codes','assets.asset_vhkt_code_id','=','asset_vhkt_codes.id')
             ->leftJoin('warehouses','assets.warehouse_id','=','warehouses.id')
             ->leftJoin('vendors','vendors.id','=','asset_qlts_codes.vendor_id')
             ->where(function ($query) use($request,$warehouse_id) {
-                $query->where('serial', 'like', "%-$request>keyWord%")
+                $query->where('asset_qlts_codes.name', 'like', "%$request->keyWord%")
                     ->where('warehouse_id', '=', $warehouse_id)
-                    ->where('asset_position_id', '=', '3');
+                    ->where('asset_position_id', '=', $request->asset_position_id);
             })
-            ->select(['assets.id as id','quantity','origin_qty','asset_qlts_codes.name as asset_name','warehouses.name as warehouse_name','asset_qlts_codes.code as qlts_code','asset_vhkt_codes.code as vhkt_code','vendors.name as vendor_name'])
+            ->select(['assets.id as id','quantity','origin_qty','asset_qlts_codes.name as asset_name','warehouses.name as warehouse_name','warehouses.id as warehouse_id','asset_qlts_codes.code as qlts_code','asset_vhkt_codes.code as vhkt_code','vendors.name as vendor_name'])
             ->get();
+
         if(!empty($request->selected)){
             $assets = $assets->map(function ($asset) use ($request){
                 $flag = false;
@@ -99,8 +100,7 @@ class LocalTransferController extends Controller
                     'note' => $tmpAsset->note,
                     'user_id' => $tmpAsset->user_id,
                     'group_id' => $tmpAsset->group_id,
-                    'indexes' => $tmpAsset->indexes,
-                    'created_at'=> now()->toDateTimeString()
+                    'indexes' => $tmpAsset->indexes
                 ]);
                 $tmpAsset->quantity = (int)$tmpAsset->quantity - (int)$asset['transfer_quantity'];
                 $tmpAsset->save();
@@ -248,4 +248,35 @@ class LocalTransferController extends Controller
         $asset = $request->assets;
     }
 
+
+    public function nodeToManager()
+    {
+        return view('local_transfers.node-to-manager');
+    }
+
+    public function getNodeAfterManagerSelected(Request $request){
+        $nodes = DB::table('nodes')
+            ->leftJoin('rooms','nodes.room_id','=','rooms.id')
+            ->where('nodes.name', 'like', "%$request->keyWord%")
+            ->select(['nodes.id as id', 'nodes.name', 'nodes.manager', 'nodes.warehouse_id','nodes.code','nodes.shortname','nodes.nims','nodes.zone','rooms.name as room_name'])
+            ->get();
+
+        return response()->json($nodes,200);
+    }
+
+    public function nodeToManagerSubmit(Request $request){
+        $manager = $request->manager;
+        $nodeTransfer = $request->node_transfer;
+        $assets = $request->assets;
+        foreach ($assets as $asset){
+            $assetTmpTransfer = AssetTempTransfer::create([
+                'asset_id' => $asset['id'],
+                'current_warehouse_id' => $asset['warehouse_id'],
+                'next_warehouse_id' => $manager['warehouse_id'],
+            ]);
+        }
+
+        return response()->json('ok',200);
+
+    }
 }
