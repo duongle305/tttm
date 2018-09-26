@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Asset;
 use App\AssetQltsCode;
 use App\Node;
+use App\User;
 use App\WareHouse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -49,7 +50,7 @@ class LocalTransferController extends Controller
             ->leftJoin('warehouses','assets.warehouse_id','=','warehouses.id')
             ->leftJoin('vendors','vendors.id','=','asset_qlts_codes.vendor_id')
             ->where(function ($query) use($request,$warehouse_id) {
-                $query->where('serial', 'like', "%$request->keyWord%")
+                $query->where('serial', 'like', "%-$request>keyWord%")
                     ->where('warehouse_id', '=', $warehouse_id)
                     ->where('asset_position_id', '=', '3');
             })
@@ -161,7 +162,7 @@ class LocalTransferController extends Controller
         $assets = $request->assetList;
         foreach ($assets as $asset){
             $asset = (object) $asset;
-            if($asset->origin_qty <= 1){
+            if($asset->origin_qty == 1){
                 $as = Asset::find($asset->id);
                 $as->warehouse_id = $nextWareHouse->warehouse_id;
                 $as->save();
@@ -198,69 +199,49 @@ class LocalTransferController extends Controller
         return response()->json(['message'=>'Điều chuyển tài sản thành công']);
     }
 
-
+    // Điều chuyển bảo hành sửa chữa
     public function warrantyRepair(Request $request)
     {
         
     }
-    public function create()
+
+
+    // Điều chuyển NVQL vs NVQL
+    public function getManagers(Request $request)
     {
-        //
+        $users = User::where('name','like', "%$request->keyword%")
+                        ->orWhere('username','like',"%$request->keyword%")
+                        ->orWhere('email','like',"%$request->keyword%")
+                        ->get();
+        $users = collect($users)->mapWithKeys(function($user){
+            return [$user->id => $user];
+        })->except([auth()->user()->id])->all();
+        return response()->json($users, 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function getAssets(){
+        $user = auth()->user();
+        $assets = DB::table('assets')->where('warehouse_id',$user->warehouse_id)
+            ->join('asset_qlts_codes','assets.asset_qlts_code_id','=','asset_qlts_codes.id')
+            ->join('vendors','asset_qlts_codes.vendor_id','=','vendors.id')
+            ->select('assets.id','assets.serial','assets.quantity','assets.origin_qty','asset_qlts_codes.name','asset_qlts_codes.code as qlts_code','vendors.name as vendor_name')
+            ->get();
+        return response()->json($assets,200);
+    }
+    public function hasWareHouse(Request $request){
+        $user = User::find($request->id);
+        if($user){
+            if(!empty($user->warehouse_id)) return response()->json(['status'=>true],200);
+        }
+        return response(['status'=>false,'message'=>'Người quản lý chưa liên kết kho vui lòng liên hệ người quản lý đó để liên kết kho !!'],200);
+    }
+    public function showFormManagerTransfer()
     {
-        //
+        $users = User::all();
+        return view('local_transfers.manager')->with(compact('users'));
+    }
+    public function managerTransfers(Request $request){
+        
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request $request
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
 }

@@ -23,9 +23,7 @@
                         <h4 class="text-center"><b>Bước 1:</b></h4>
                         <h6 class="grey-300 text-center">Chọn Node để chuyển tài sản vào</h6>
                         <div class="form-group">
-                            <select data-placeholder="Chọn node..." class="select" name="nextNode" id="nodes">
-                                <option value=""></option>
-                            </select>
+                            <select data-placeholder="Chọn node..." class="select" name="nextNode" id="nodes"> </select>
                             <h6 class="grey-300 text-center mt-10">Danh sách hiển thị là các node đã liên kết với kho dành riêng cho mỗi node. nếu không tìm thấy hãy qua <code>Quản lý node</code> để liên kết kho</h6>
                         </div>
                     </div>
@@ -109,29 +107,31 @@
         let assetList = [], nextNode = {}, currentWarehouse = {};
         let status = false;
         let form = $('#form_repository_transfer');
+        // review asset
         function review(){
             let nw= $('#node-warehouse');
-            nw.append(
+            nw.html(
                 `<tr>
                     <th>Node đích</th>
                     <td>${nextNode.name} / ${nextNode.nims} / ${nextNode.manager}</td>
-                </tr>`
-            );
-            nw.append(
-                `<tr>
+                </tr>
+                <tr>
                     <th>Kho chuyển</th>
                     <td>${currentWarehouse.name} / ${currentWarehouse.code}</td>
                 </tr>`
             );
+            let assets = '';
             for(let t of assetList){
-                $('#asset-list-detail tbody').append(`
+               assets += `
                     <tr>
                         <td>${t.id}</td>
                         <td>${t.serial} // ${t.name}</td>
                         <td>${t.newQuantity}</td>
                     </tr>
-                `);
+                `;
             }
+            $('#asset-list-detail tbody').html(assets);
+
         }
         form.steps({
             headerTag: "h6",
@@ -211,7 +211,9 @@
                 return $(event.target).show().valid();
             },
             onFinished: function (event, currentIndex) {
-                location.reload();
+                setTimeout(()=>{
+                    location.reload();
+                },2000);
             }
         });
         //step 1
