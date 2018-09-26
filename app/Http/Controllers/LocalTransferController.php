@@ -50,7 +50,7 @@ class LocalTransferController extends Controller
             ->leftJoin('warehouses','assets.warehouse_id','=','warehouses.id')
             ->leftJoin('vendors','vendors.id','=','asset_qlts_codes.vendor_id')
             ->where(function ($query) use($request,$warehouse_id) {
-                $query->where('serial', 'like', "%$request->keyWord%")
+                $query->where('serial', 'like', "%-$request>keyWord%")
                     ->where('warehouse_id', '=', $warehouse_id)
                     ->where('asset_position_id', '=', '3');
             })

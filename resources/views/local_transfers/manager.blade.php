@@ -2,45 +2,54 @@
 @section('title','Điều chuyển giữa nhân viên quản lý')
 
 @section('vendor_js')
+    <script type="text/javascript" src="assets/js/plugins/forms/wizards/steps.min.js"></script>
     <script type="text/javascript" src="{{ asset('assets/js/plugins/forms/selects/select2.min.js') }}"></script>
 @endsection
 
 
 @section('content')
-    <form action="#">
-        <div class="panel panel-flat">
-            <div class="panel-heading">
-                <h5 class="panel-title">Điều chuyển nhân viên quản lý</h5>
-            </div>
+    <div class="panel panel-white">
+        <div class="panel-heading">
+            <h6 class="panel-title">Điều chuyển tài sản</h6>
+        </div>
 
-            <div class="panel-body">
-                <div class="form-group">
-                    <label for="next-manager">Chọn người quản lý cần chuyển tài sản đến <span class="text-danger">*</span></label>
-                    <select name="next-manager" id="next-manager" class="select2" data-placeholder="Chọn người quản lý..."></select>
-                </div>
-                <div class="form-group" style="display: none;">
-                    <div class="row">
-                        <div class="col-lg-10">
-                            <label for="asset">Chọn tài sản</label>
-                            <select name="asset" id="asset" class="select2" data-placeholder="Chọn tài sản..."></select>
-                        </div>
-                        <div class="col-lg-2">
-                            <label>Số lượng</label>
-                            <input type="number" id="quantity" class="form-control" placeholder="Số lượng">
+        <form class="steps-transfers" action="#">
+            <h6>Chọn nhân viên</h6>
+            <fieldset>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <label for="next-manager">Chọn nhân viên <span class="text-danger">*</span></label>
+                            <select name="next-manager" id="next-manager"></select>
                         </div>
                     </div>
                 </div>
-                <div class="text-right">
-                    <button type="submit" class="btn btn-success">Submit<i class="icon-arrow-right14 position-right"></i></button>
-                </div>
-            </div>
-        </div>
-    </form>
+            </fieldset>
+            <h6>Additional info</h6>
+            <fieldset data-mode="async" data-url="assets/demo_data/wizard/additional.html"></fieldset>
+        </form>
+    </div>
 @endsection
 
 
 @section('custom_js')
     <script>
+        $('.steps-transfers').steps({
+            headerTag: "h6",
+            bodyTag: "fieldset",
+            transitionEffect: "fade",
+            titleTemplate: '<span class="number">#index#</span> #title#',
+            labels: {
+                finish: 'Submit'
+            },
+            onStepChanging: (e, currentIndex, nextIndex)=>{
+                switch (currentIndex) {
+                    case 0:{
+
+                    }
+                }
+            },
+        });
         let nextManager = $('#next-manager');
         let asset = $('#asset');
         nextManager.select2({
