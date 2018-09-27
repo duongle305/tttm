@@ -1,6 +1,6 @@
 @extends ('layouts.app')
 
-@section('title','Thêm mới đâu việc')
+@section('title','Điều chuyển tài sản giữa Node và Kho')
 @section('vendor_js')
     <script type="text/javascript" src="{{ asset('assets/js/plugins/forms/wizards/steps.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/js/plugins/forms/selects/select2.min.js') }}"></script>

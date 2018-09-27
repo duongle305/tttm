@@ -1,6 +1,6 @@
 @extends ('layouts.app')
 
-@section('title','Thêm mới đâu việc')
+@section('title','Điều chuyển tài sản giữa Kho và Nhân viên quản lý')
 @section('vendor_js')
     <script type="text/javascript" src="{{ asset('assets/js/plugins/notifications/pnotify.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/js/plugins/notifications/jgrowl.min.js') }}"></script>
