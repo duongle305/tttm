@@ -312,7 +312,6 @@ class LocalTransferController extends Controller
         return view('local_transfers.asset-temp-transfers')->with(compact('assets'));
     }
 
-<<<<<<< HEAD
     public function warehouseToManager(){
         return view('local_transfers.warehouse-to-manager');
     }
@@ -320,7 +319,6 @@ class LocalTransferController extends Controller
     public function getWarehouseAfterManagerSelected(Request $request){
 
     }
-=======
     public function assetTempTransfers()
     {
         $user = auth()->user();
@@ -356,7 +354,7 @@ class LocalTransferController extends Controller
             ->make(true);
     }
     public function cancelAssetTempTransfer(Request $request){
-        $assetTemp = AssetTempTransfer::find($requestgtid);
+        $assetTemp = AssetTempTransfer::find($request->id);
         $assetTemp->delete();
         return response()->json(['status'=>true],200);
     }
@@ -399,6 +397,4 @@ class LocalTransferController extends Controller
         }
     }
 
-
->>>>>>> 8e6a69144e4a8df7a11d5e654351b6520cfdd35b
 }
