@@ -38,6 +38,7 @@ Route::middleware('auth')->group(function(){
 
 
     Route::get('transfer-warehouse-to-manager','LocalTransferController@warehouseToManager')->name('local-transfers.warehouse-to-manager');
+<<<<<<< HEAD
     Route::get('ajax/transfer-warehouse-to-manager/get-manager','LocalTransferController@getCurrentUser')->name('local-transfers.warehouse-to-manager.get-manager');
     Route::post('ajax/transfer-warehouse-to-manager/get-warehouse','LocalTransferController@getWarehouse')->name('local-transfers.warehouse-to-manager.get-warehouse');
     Route::post('ajax/transfer-warehouse-to-manager/get-assets-after-warehouse','LocalTransferController@getAssetAfterWarehouseSelected')->name('local-transfers.warehouse-to-manager.get-assets');
@@ -59,7 +60,35 @@ Route::middleware('auth')->group(function(){
     Route::get('manager-transfers/assets-temp','LocalTransferController@assetTempTransfers')->name('local-manager-transfers.assets-temp');
     Route::post('manager-transfers/accept-temp-transfer','LocalTransferController@acceptAssetTempTransfer')->name('local-manager-transfers.accept-asset-transfer');
     Route::post('manager-transfers/cancel-temp-transfer','LocalTransferController@cancelAssetTempTransfer')->name('local-manager-transfers.cancel-asset-transfer');
+=======
+    Route::post('ajax/transfer-warehouse-to-manager/get-warehouse','LocalTransferController@getWarehouseAfterManagerSelected')->name('local-transfers.warehouse-to-manager.get-warehouse');
+>>>>>>> c4b7ce2440c1cf5e1d8292637da43d6ccd4708b0
 
+
+
+    //transfer warehouse to node
+    Route::prefix('warehouse-to-node')->group(function(){
+        Route::get('create','TransferController@showFormWarehouseToNode')->name('warehouse-to-node.create');
+        Route::post('nodes','TransferController@getNodes')->name('warehouse-to-node.nodes');
+        Route::post('warehouses','TransferController@getWarehouses')->name('warehouse-to-node.warehouses');
+        Route::post('assets','TransferController@getAssets')->name('warehouse-to-node.assets');
+        Route::post('submit','TransferController@transferWarehouseToNode')->name('warehouse-to-node.submit');
+
+    });
+    //transfer warehouse to node
+
+    //transfer manager to manager
+    Route::prefix('manager-transfers')->group(function(){
+        Route::get('create', 'LocalTransferController@showFormManagerTransfer')->name('local-manager-transfers.create');
+        Route::post('managers', 'LocalTransferController@getManagers')->name('local-manager-transfers.managers');
+        Route::post('assets', 'LocalTransferController@getAssets')->name('local-manager-transfers.assets');
+        Route::post('transfer', 'LocalTransferController@managerTransfer')->name('local-manager-transfers.transfer');
+        Route::get('assets-temp-transfers','LocalTransferController@showAssetTempTransfers')->name('local-manager-transfers.assets-temp-transfers');
+        Route::get('assets-temp','LocalTransferController@assetTempTransfers')->name('local-manager-transfers.assets-temp');
+        Route::post('accept-temp-transfer','LocalTransferController@acceptAssetTempTransfer')->name('local-manager-transfers.accept-asset-transfer');
+        Route::post('cancel-temp-transfer','LocalTransferController@cancelAssetTempTransfer')->name('local-manager-transfers.cancel-asset-transfer');
+    });
+    //transfer manager to manager
 
 
 
