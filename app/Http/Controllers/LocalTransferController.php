@@ -10,6 +10,7 @@ use App\User;
 use App\WareHouse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\DataTables;
 
 class LocalTransferController extends Controller
 {
@@ -223,11 +224,16 @@ class LocalTransferController extends Controller
     public function getAssets(Request $request){
         $user = auth()->user();
         $asset_id = empty($request->asset_id)?[]:$request->asset_id;
+        $assetTempTransfer = collect(AssetTempTransfer::where('current_warehouse_id',$user->warehouse_id)
+            ->select(['asset_id'])
+            ->get())
+            ->map((function($item){ return $item->asset_id; }))
+            ->merge($asset_id)->all();
         $assets = DB::table('assets')->where('warehouse_id',$user->warehouse_id)
             ->join('asset_qlts_codes','assets.asset_qlts_code_id','=','asset_qlts_codes.id')
             ->join('vendors','asset_qlts_codes.vendor_id','=','vendors.id')
             ->select('assets.id','assets.serial','assets.quantity','assets.origin_qty','asset_qlts_codes.name','asset_qlts_codes.code as qlts_code','vendors.name as vendor_name')
-            ->whereNotIn('assets.id',$asset_id)
+            ->whereNotIn('assets.id',$assetTempTransfer)
             ->get();
         return response()->json($assets,200);
     }
@@ -236,16 +242,26 @@ class LocalTransferController extends Controller
         if($user){
             if(!empty($user->warehouse_id)) return response()->json(['status'=>true],200);
         }
-        return response(['status'=>false,'message'=>'Người quản lý chưa liên kết kho vui lòng liên hệ người quản lý đó để liên kết kho !!'],200);
+        return response(['status'=>false],200);
     }
     public function showFormManagerTransfer()
     {
         $users = User::all();
         return view('local_transfers.manager')->with(compact('users'));
     }
-    public function managerTransfers(Request $request){
-        $manager = User::find($request->manager_id);
-        $asset = $request->assets;
+    public function managerTransfer(Request $request){
+        $next_manager = User::find($request->manager_id);
+        $assets = $request->assets;
+        foreach ($assets as $asset){
+            $asset = (object) $asset;
+            AssetTempTransfer::create([
+                'asset_id' => $asset->id,
+                'quantity'=>$asset->quantity,
+                'current_warehouse_id' => auth()->user()->warehouse_id,
+                'next_warehouse_id' =>$next_manager->warehouse_id,
+            ]);
+        }
+        return response()->json(['status'=>true],200);
     }
 
 
@@ -277,6 +293,91 @@ class LocalTransferController extends Controller
         }
 
         return response()->json('ok',200);
-
     }
+
+
+    public function showAssetTempTransfers()
+    {
+        return view('local_transfers.asset-temp-transfers')->with(compact('assets'));
+    }
+
+    public function assetTempTransfers()
+    {
+        $user = auth()->user();
+        $assets = AssetTempTransfer::where('asset_temp_transfers.next_warehouse_id',$user->warehouse_id)
+            ->join('users','users.warehouse_id','=','asset_temp_transfers.current_warehouse_id')
+            ->join('assets','assets.id','=','asset_temp_transfers.asset_id')
+            ->join('asset_qlts_codes','assets.asset_qlts_code_id','=','asset_qlts_codes.id')
+            ->join('vendors','asset_qlts_codes.vendor_id','=','vendors.id')
+            ->select(
+                'asset_temp_transfers.id as id',
+                'asset_qlts_codes.name as asset_name',
+                'asset_temp_transfers.quantity as asset_quantity',
+                'vendors.name as vendor_name',
+                'users.name as manager_transfer',
+                'users.email as email_transfer',
+                'asset_qlts_codes.code')
+            ->get();
+        return DataTables::of($assets)
+            ->addColumn('actions', function($item){
+                return '<ul class="icons-list">
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
+                                    <i class="icon-menu9"></i>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-right">
+                                    <li><a href="#" class="accept"  data-id="'.$item->id.'"><i class="icon-check"></i>Chấp nhận</a></li>
+                                    <li><a href="#" class="cancel"  data-id="'.$item->id.'"><i class="icon-close2"></i> Hủy</a></li>
+                                </ul>
+                            </li>
+                        </ul>';
+            })
+            ->rawColumns(['actions'])
+            ->make(true);
+    }
+    public function cancelAssetTempTransfer(Request $request){
+        $assetTemp = AssetTempTransfer::find($requestgtid);
+        $assetTemp->delete();
+        return response()->json(['status'=>true],200);
+    }
+    public function acceptAssetTempTransfer(Request $request)
+    {
+        $assetTemp = AssetTempTransfer::find($request->id);
+        $asset = $assetTemp->asset;
+        if($assetTemp->asset->origin_qty == 1){
+            $asset->warehouse_id = $assetTemp->next_warehouse_id;
+            if($asset->save())
+                $assetTemp->delete();
+            return response()->json(['status'=>true],200);
+        }else{
+            Asset::create([
+                'serial'=>$asset->serial,
+                'serial2'=>$asset->serial2,
+                'serial3'=>$asset->serial3,
+                'serial4'=>$asset->serial4,
+                'origin'=>$asset->origin,
+                'warranty_partner'=>$asset->warranty_partner,
+                'warranty_period'=>$asset->warranty_period,
+                'quantity'=> intval($assetTemp->quanity),
+                'manager'=> $asset->manager,
+                'asset_type_id'=>$asset->asset_type_id,
+                'asset_position_id'=>$asset->asset_position_id,
+                'warehouse_id'=>$assetTemp->next_warehouse_id,
+                'asset_status_id'=>$asset->asset_status_id,
+                'asset_qlts_code_id'=>$asset->asset_qlts_code_id,
+                'asset_vhkt_code_id'=>$asset->asset_vhkt_code_id,
+                'parent_id'=>$asset->id,
+                'origin_qty'=>$asset->origin_qty,
+                'note'=>$asset->note,
+                'user_id'=>$asset->user_id,
+                'group_id'=>$asset->group_id,
+                'indexes'=>$asset->indexes,
+            ]);
+            $asset->quantity = intval($asset->quantity) - intval($assetTemp->quanity);
+            $assetTemp->delete();
+            return response()->json(['status'=>true]);
+        }
+    }
+
+
 }

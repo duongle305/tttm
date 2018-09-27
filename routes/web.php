@@ -49,6 +49,14 @@ Route::middleware('auth')->group(function(){
     Route::post('manager-transfers/has-warehouse', 'LocalTransferController@hasWareHouse')->name('local-manager-transfers.has-warehouse');
     Route::post('manager-transfers/assets', 'LocalTransferController@getAssets')->name('local-manager-transfers.assets');
     Route::post('manager-transfers/transfer', 'LocalTransferController@managerTransfer')->name('local-manager-transfers.transfer');
+    Route::get('manager-transfers/assets-temp-transfers','LocalTransferController@showAssetTempTransfers')->name('local-manager-transfers.assets-temp-transfers');
+    Route::get('manager-transfers/assets-temp','LocalTransferController@assetTempTransfers')->name('local-manager-transfers.assets-temp');
+    Route::post('manager-transfers/accept-temp-transfer','LocalTransferController@acceptAssetTempTransfer')->name('local-manager-transfers.accept-asset-transfer');
+    Route::post('manager-transfers/cancel-temp-transfer','LocalTransferController@cancelAssetTempTransfer')->name('local-manager-transfers.cancel-asset-transfer');
+
+
+
+
 
     Route::get('users', 'ChangeRegisterController@users')->name('cr.users');
     Route::get('change-registers/all','ChangeRegisterController@allChangeRegister')->name('change-registers.all');

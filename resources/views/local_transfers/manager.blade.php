@@ -152,11 +152,19 @@
                     headers: {'X-CSRF-Token': $('input[name="_token"]').attr('value')},
                     data:{ manager_id: nextManager.select2('data')[0].id, assets: dataAsset },
                 }).done((res)=>{
-
+                    if(res.status) new PNotify({
+                        title: 'Thông báo',
+                        text: 'Điều chuyển tài sản thành công!',
+                        addclass: 'bg-success',
+                        type:'success'
+                    });
                 });
+                return true;
             },
             onFinished: (e)=>{
-
+                setTimeout(()=>{
+                    location.reload();
+                },2500)
             }
         });
         let nextManager = $('#next-manager');
