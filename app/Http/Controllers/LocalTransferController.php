@@ -9,6 +9,7 @@ use App\Node;
 use App\User;
 use App\WareHouse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 
@@ -22,7 +23,7 @@ class LocalTransferController extends Controller
     public function index()
     {
 
-        return view('local_transfers.index');
+        return view('local_transfers.node-to-node');
     }
 
 
@@ -48,7 +49,7 @@ class LocalTransferController extends Controller
         return response()->json($nodes, 200);
     }
 
-    public function getAssetsByNode(Request $request)
+    public function getAssetsAfterNodeSelected(Request $request)
     {
         $warehouse_id = $request->node['warehouse_id'];
         $assets = DB::table('assets')
@@ -83,43 +84,50 @@ class LocalTransferController extends Controller
     }
 
     public function nodeToNode(Request $request){
-        $flag = false;
+        $flag = true;
         $warehouse = Node::find($request->node_destination['id'])->warehouse;
         $assets = $request->assets;
         foreach ($assets as $asset){
             $tmpAsset = Asset::find($asset['id']);
-            if($asset['transfer_quantity'] > 1){
-                $childAsset = Asset::insert([
-                    'serial' => $tmpAsset->serial,
-                    'serial2' => $tmpAsset->serial2,
-                    'serial3' => $tmpAsset->serial3,
-                    'serial4' => $tmpAsset->serial4,
-                    'quantity' => $asset['transfer_quantity'],
-                    'parent_id' => $tmpAsset->id,
-                    'origin' => $tmpAsset->origin,
-                    'warranty_partner' => $tmpAsset->warranty_partner,
-                    'warranty_period' => $tmpAsset->warranty_period,
-                    'manager' => $tmpAsset->manager,
-                    'asset_type_id' => $tmpAsset->asset_type_id,
-                    'asset_position_id' => $tmpAsset->asset_position_id,
-                    'warehouse_id' => $warehouse->id,
-                    'asset_status_id' => $tmpAsset->asset_status_id,
-                    'asset_qlts_code_id' => $tmpAsset->asset_qlts_code_id,
-                    'asset_vhkt_code_id' => $tmpAsset->asset_vhkt_code_id,
-                    'origin_qty' => $tmpAsset->origin_qty,
-                    'note' => $tmpAsset->note,
-                    'user_id' => $tmpAsset->user_id,
-                    'group_id' => $tmpAsset->group_id,
-                    'indexes' => $tmpAsset->indexes
-                ]);
-                $tmpAsset->quantity = (int)$tmpAsset->quantity - (int)$asset['transfer_quantity'];
-                $tmpAsset->save();
+            if($tmpAsset->isNextPositionPermit('2')){
+                if($asset['transfer_quantity'] > 1){
+                    $childAsset = Asset::insert([
+                        'serial' => $tmpAsset->serial,
+                        'serial2' => $tmpAsset->serial2,
+                        'serial3' => $tmpAsset->serial3,
+                        'serial4' => $tmpAsset->serial4,
+                        'quantity' => $asset['transfer_quantity'],
+                        'parent_id' => $tmpAsset->id,
+                        'origin' => $tmpAsset->origin,
+                        'warranty_partner' => $tmpAsset->warranty_partner,
+                        'warranty_period' => $tmpAsset->warranty_period,
+                        'manager' => $tmpAsset->manager,
+                        'asset_type_id' => $tmpAsset->asset_type_id,
+                        'asset_position_id' => $tmpAsset->asset_position_id,
+                        'warehouse_id' => $warehouse->id,
+                        'asset_status_id' => $tmpAsset->asset_status_id,
+                        'asset_qlts_code_id' => $tmpAsset->asset_qlts_code_id,
+                        'asset_vhkt_code_id' => $tmpAsset->asset_vhkt_code_id,
+                        'origin_qty' => $tmpAsset->origin_qty,
+                        'note' => $tmpAsset->note,
+                        'user_id' => $tmpAsset->user_id,
+                        'group_id' => $tmpAsset->group_id,
+                        'indexes' => $tmpAsset->indexes
+                    ]);
+
+                    $tmpAsset->quantity = (int)$tmpAsset->quantity - (int)$asset['transfer_quantity'];
+                    $tmpAsset->save();
+                } else {
+                    $tmpAsset->warehouse_id = $warehouse->id;
+                    $tmpAsset->save();
+                }
             } else {
-                $tmpAsset->warehouse_id = $warehouse->id;
-                $tmpAsset->save();
+                $flag = false;
+                break;
             }
         }
-        return response()->json('ok',200);
+
+        return ($flag) ? response()->json('ok',200) : response()->json('failed',403);
     }
 
     /**
@@ -131,6 +139,7 @@ class LocalTransferController extends Controller
     {
         return view('local_transfers.warehouse');
     }
+
     public function getWareHouseTransfers(Request $request){
         $wareHouses = WareHouse::where('name','like',"%$request->keyword%")
             ->select(['id','name','code','parent_text'])
@@ -316,8 +325,65 @@ class LocalTransferController extends Controller
         return view('local_transfers.warehouse-to-manager');
     }
 
-    public function getWarehouseAfterManagerSelected(Request $request){
+    public function getWarehouse(Request $request){
+        $warehouses  = WareHouse::where(function ($query) use($request){
+            $query->where('parent_id','>','9')
+                ->where('name','like',"%$request->keyword%");
+        })->get();
 
+        return response()->json($warehouses,200);
+    }
+
+    public function getAssetAfterWarehouseSelected(Request $request){
+        $assets = DB::table('assets')
+            ->leftJoin('asset_qlts_codes','assets.asset_qlts_code_id','=','asset_qlts_codes.id')
+            ->leftJoin('asset_vhkt_codes','assets.asset_vhkt_code_id','=','asset_vhkt_codes.id')
+            ->leftJoin('warehouses','assets.warehouse_id','=','warehouses.id')
+            ->leftJoin('vendors','vendors.id','=','asset_qlts_codes.vendor_id')
+            ->where(function ($query) use($request) {
+                $query->where('asset_qlts_codes.name', 'like', "%$request->keyWord%")
+                    ->where('warehouse_id', '=', $request->warehouse['id'])
+                    ->whereNotIn('assets.id',function($query) {
+                        $query->select('asset_id')->from('asset_temp_transfers');
+                    });
+            })->select(['assets.id as id','quantity','origin_qty','asset_qlts_codes.name as asset_name','warehouses.name as warehouse_name','warehouses.id as warehouse_id','asset_qlts_codes.code as qlts_code','asset_vhkt_codes.code as vhkt_code','vendors.name as vendor_name'])
+            ->get();
+        if(!empty($request->selected)){
+            $assets = $assets->map(function ($asset) use ($request){
+                $flag = false;
+                foreach ($request->selected as $select){
+                    if($select['id'] == $asset->id) {
+                        $flag = true;
+                        break;
+                    }
+                }
+                if($flag) return null;
+                return $asset;
+            });
+        }
+        return response()->json($assets,200);
+    }
+
+    public function getCurrentUser(){
+        return response()->json(Auth::user(),200);
+    }
+
+    public function warehouseToManagerSubmit(Request $request){
+        $warehouse = $request->warehouse;
+        $assets = $request->assets;
+        $flag = true;
+        foreach ($assets as $asset){
+            $tmpAsset = Asset::find($asset['id']);
+            if($tmpAsset->isNextPositionPermit('2')){
+                $tmpAsset->warehouse_id = Auth::user()->warehouse_id;
+                $tmpAsset->save();
+            } else {
+                $flag = false;
+                break;
+            }
+        }
+
+        return ($flag) ? response()->json('ok',200) : response()->json('failed',401);
     }
     public function assetTempTransfers()
     {

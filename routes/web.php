@@ -29,7 +29,7 @@ Route::middleware('auth')->group(function(){
     //local transfer
     Route::get('change-local-transfers','LocalTransferController@index')->name('local-transfers.index');
     Route::post('ajax/nodes','LocalTransferController@getNodes')->name('local-transfers.nodes');
-    Route::post('ajax/get-assets-by-node','LocalTransferController@getAssetsByNode')->name('local-transfers.assets');
+    Route::post('ajax/get-assets-by-node','LocalTransferController@getAssetsAfterNodeSelected')->name('local-transfers.assets');
     Route::post('ajax/node-to-node','LocalTransferController@nodeToNode')->name('local-transfers.assets.submit');
 
     Route::get('transfer-node-to-manager','LocalTransferController@nodeToManager')->name('local-transfers.node-to-manager');
@@ -38,7 +38,10 @@ Route::middleware('auth')->group(function(){
 
 
     Route::get('transfer-warehouse-to-manager','LocalTransferController@warehouseToManager')->name('local-transfers.warehouse-to-manager');
-    Route::post('ajax/transfer-warehouse-to-manager/get-warehouse','LocalTransferController@getWarehouseAfterManagerSelected')->name('local-transfers.warehouse-to-manager.get-warehouse');
+    Route::get('ajax/transfer-warehouse-to-manager/get-manager','LocalTransferController@getCurrentUser')->name('local-transfers.warehouse-to-manager.get-manager');
+    Route::post('ajax/transfer-warehouse-to-manager/get-warehouse','LocalTransferController@getWarehouse')->name('local-transfers.warehouse-to-manager.get-warehouse');
+    Route::post('ajax/transfer-warehouse-to-manager/get-assets-after-warehouse','LocalTransferController@getAssetAfterWarehouseSelected')->name('local-transfers.warehouse-to-manager.get-assets');
+    Route::post('ajax/transfer-warehouse-to-manager/submit','LocalTransferController@warehouseToManagerSubmit')->name('local-transfers.warehouse-to-manager.submit');
     //repository transfers
     Route::get('ware-house-transfers','LocalTransferController@wareHouseTransfers')->name('local-warehouse-transfers.create');
     Route::post('ajax/warehouses','LocalTransferController@getWareHouseTransfers')->name('local-transfers.warehouses');

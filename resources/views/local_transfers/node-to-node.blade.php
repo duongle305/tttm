@@ -2,7 +2,7 @@
 
 @section('title','Thêm mới đâu việc')
 @section('vendor_js')
-    <script type="text/javascript" src="{{ asset('assets/js/plugins/notifications/pnotify.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('assets/js/plugins/notifications/sweet_alert.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/js/plugins/notifications/jgrowl.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/js/plugins/notifications/noty.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/js/plugins/forms/wizards/steps.min.js') }}"></script>
@@ -191,6 +191,7 @@
 @endsection
 @section('custom_js')
     <script>
+
         $(document).ready(function () {
             var step1Status = false;
             var step2Status = false;
@@ -261,9 +262,11 @@
                         },
                         success: function (data) {
                             if (data == 'ok') {
-                                $.jGrowl('Tài sản đã được điều chuyển', {
-                                    header: 'Thành công!',
-                                    theme: 'bg-success'
+                                swal({
+                                    title: 'Thành công!',
+                                    text: 'Điều chuyển tài sản thành công!',
+                                    type: 'success',
+                                    confirmButtonText: 'Đóng'
                                 });
                                 $(event.target.lastChild.lastChild.lastChild.lastChild).attr('href','javascript:void(0)');
                                 setTimeout(function () {
@@ -272,9 +275,11 @@
                             }
                         },
                         error: function(XMLHttpRequest, textStatus, errorThrown) {
-                            $.jGrowl('Có lỗi xảy ra', {
-                                header: 'Điều chuyển không thành công!',
-                                theme: 'bg-danger'
+                            swal({
+                                title: 'Lỗi!',
+                                text: 'Hệ thống đang bị lỗi rất nghiêm trọng, vui lòng liên hệ System admin để biết chi tiết',
+                                type: 'error',
+                                confirmButtonText: 'Đóng'
                             });
                         }
                     })
@@ -357,10 +362,13 @@
 
             $('#step_1_select').on('select2:select', (e) => {
                 if (e.params.data.data.warehouse_id == null) {
-                    $.jGrowl('Hệ thống đang bị lỗi rất nghiêm trọng, vui lòng liên hệ System admin để biết chi tiết', {
-                        header: 'Nguy hiểm!',
-                        theme: 'bg-danger'
+                    swal({
+                        title: 'Nguy hiểm!',
+                        text: 'Hệ thống đang bị lỗi rất nghiêm trọng, vui lòng liên hệ System admin để biết chi tiết',
+                        type: 'error',
+                        confirmButtonText: 'Đóng'
                     });
+
                     $('#step1_error_show').html('');
                     $('#step_1_select').val(null).trigger('change');
                     node_destination = null;
@@ -402,9 +410,11 @@
 
             $('#step_2_select').on('select2:select', (e) => {
                 if (e.params.data.data.warehouse_id == null) {
-                    $.jGrowl('Hệ thống đang bị lỗi rất nghiêm trọng, vui lòng liên hệ System admin để biết chi tiết', {
-                        header: 'Nguy hiểm!',
-                        theme: 'bg-danger'
+                    swal({
+                        title: 'Nguy hiểm!',
+                        text: 'Hệ thống đang bị lỗi rất nghiêm trọng, vui lòng liên hệ System admin để biết chi tiết',
+                        type: 'error',
+                        confirmButtonText: 'Đóng'
                     });
                     $('#step2_error_show').html('');
                     $('#step_2_select').val(null).trigger('change');
