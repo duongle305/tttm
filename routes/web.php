@@ -39,24 +39,27 @@ Route::middleware('auth')->group(function(){
 
     Route::get('transfer-warehouse-to-manager','LocalTransferController@warehouseToManager')->name('local-transfers.warehouse-to-manager');
     Route::post('ajax/transfer-warehouse-to-manager/get-warehouse','LocalTransferController@getWarehouseAfterManagerSelected')->name('local-transfers.warehouse-to-manager.get-warehouse');
-    //repository transfers
-    Route::get('ware-house-transfers','LocalTransferController@wareHouseTransfers')->name('local-warehouse-transfers.create');
-    Route::post('ajax/warehouses','LocalTransferController@getWareHouseTransfers')->name('local-transfers.warehouses');
-    Route::post('ajax/assets','LocalTransferController@getAssetByWareHouseId')->name('local-transfers.assets');
-    Route::post('ajax/checkQuantity','LocalTransferController@checkQuantity')->name('local-transfers.quantity');
-    Route::post('ajax/warehouse-to-node','LocalTransferController@wareHouseToNode')->name('local-transfers.warehouse-to-node');
-    // manager transfers
+
+
+
+    //transfer warehouse to node
+    Route::get('warehouse-to-node','TransferController@showFormWarehouseToNode')->name('warehouse-to-node.create');
+    Route::post('warehouse-to-node/nodes','TransferController@getNodes')->name('warehouse-to-node.nodes');
+    Route::post('warehouse-to-node/warehouses','TransferController@getWarehouses')->name('warehouse-to-node.warehouses');
+    Route::post('warehouse-to-node/assets','TransferController@getAssets')->name('warehouse-to-node.assets');
+    Route::post('warehouse-to-node/submit','TransferController@transferWarehouseToNode')->name('warehouse-to-node.submit');
+    //transfer warehouse to node
+
+    //transfer manager to manager
     Route::get('manager-transfers', 'LocalTransferController@showFormManagerTransfer')->name('local-manager-transfers.create');
     Route::post('manager-transfers/managers', 'LocalTransferController@getManagers')->name('local-manager-transfers.managers');
-    Route::post('manager-transfers/assets', 'LocalTransferController@getAssets')->name('local-manager-transfers.assets');
-    Route::post('manager-transfers/has-warehouse', 'LocalTransferController@hasWareHouse')->name('local-manager-transfers.has-warehouse');
     Route::post('manager-transfers/assets', 'LocalTransferController@getAssets')->name('local-manager-transfers.assets');
     Route::post('manager-transfers/transfer', 'LocalTransferController@managerTransfer')->name('local-manager-transfers.transfer');
     Route::get('manager-transfers/assets-temp-transfers','LocalTransferController@showAssetTempTransfers')->name('local-manager-transfers.assets-temp-transfers');
     Route::get('manager-transfers/assets-temp','LocalTransferController@assetTempTransfers')->name('local-manager-transfers.assets-temp');
     Route::post('manager-transfers/accept-temp-transfer','LocalTransferController@acceptAssetTempTransfer')->name('local-manager-transfers.accept-asset-transfer');
     Route::post('manager-transfers/cancel-temp-transfer','LocalTransferController@cancelAssetTempTransfer')->name('local-manager-transfers.cancel-asset-transfer');
-
+    //transfer manager to manager
 
 
 

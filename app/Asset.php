@@ -27,6 +27,10 @@ class Asset extends Model
         return $this->belongsTo('App\AssetPosition','asset_position_id','id');
     }
 
+    public function nextPosition()
+    {
+        return $this->hasMany('App\AssetNextPosition','asset_position_id','current_id');
+    }
     public function isNextPositionPermit($nextPositionID){
         $flag = false;
         foreach (AssetNextPosition::where('current_id','=',$this->assetPosition()->first()->id)->get() as $case){

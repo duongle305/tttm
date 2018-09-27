@@ -40,10 +40,15 @@
                         </ul>
                         <ul>
                             <li><a href="{{ route('local-transfers.index') }}">Điều chuyển giữa các node nội bộ</a></li>
-                            <li><a href="{{ route('local-warehouse-transfers.create') }}">Điều chuyển giữa các kho nội bộ</a></li>
                             <li><a href="{{ route('local-manager-transfers.create') }}">Điều chuyển giữa nhân viên quản lý</a></li>
                             <li><a href="{{ route('local-transfers.node-to-manager') }}">Điều chuyển giữa node và nhân viên quản lý</a></li>
                             <li><a href="{{ route('local-transfers.warehouse-to-manager') }}">Điều chuyển giữa kho và nhân viên quản lý</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="icon-stack2"></i> <span>Điều chuyển</span></a>
+                        <ul>
+                            <li><a href="{{ route('warehouse-to-node.create') }}">Kho sang node</a></li>
                         </ul>
                     </li>
                 </ul>
