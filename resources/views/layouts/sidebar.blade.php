@@ -36,6 +36,7 @@
                         <a href="#"><i class="icon-stack2"></i> <span>Quản lý điều chuyển</span></a>
                         <ul>
                             <li><a href="{{ route('change-registers.index') }}">Danh sách đầu việc</a></li>
+                            <li><a href="{{ route('local-manager-transfers.assets-temp-transfers') }}">Danh sách tài sản điều chuyển chờ nhận</a></li>
                         </ul>
                         <ul>
                             <li><a href="{{ route('local-transfers.index') }}">Điều chuyển giữa các node nội bộ</a></li>
