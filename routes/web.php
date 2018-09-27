@@ -60,7 +60,13 @@ Route::middleware('auth')->group(function(){
         Route::post('warehouses','TransferController@getWarehouses')->name('warehouse-to-node.warehouses');
         Route::post('assets','TransferController@getAssets')->name('warehouse-to-node.assets');
         Route::post('submit','TransferController@transferWarehouseToNode')->name('warehouse-to-node.submit');
-
+    });
+    Route::prefix('node-to-warehouse')->group(function(){
+        Route::get('create','TransferController@showFormNodeToWarehouse')->name('node-to-warehouse.create');
+        Route::post('nodes','TransferController@getNodes')->name('node-to-warehouse.nodes');
+        Route::post('warehouses','TransferController@getWarehouses')->name('node-to-warehouse.warehouses');
+        Route::post('assets','TransferController@getAssets')->name('node-to-warehouse.assets');
+        Route::post('submit','TransferController@transferNodeToWarehouse')->name('node-to-warehouse.submit');
     });
     //transfer warehouse to node
 

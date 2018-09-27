@@ -50,6 +50,7 @@
                         <a href="#"><i class="icon-stack2"></i> <span>Điều chuyển</span></a>
                         <ul>
                             <li><a href="{{ route('warehouse-to-node.create') }}">Kho sang node</a></li>
+                            <li><a href="{{ route('node-to-warehouse.create') }}">Node sang kho</a></li>
                         </ul>
                     </li>
                 </ul>
