@@ -38,8 +38,7 @@ class TransferController extends Controller
             ->get();
         return response()->json($warehouses, 200);
     }
-    public function getAssets(Request $request)
-    {
+    public function getAssets(Request $request)    {
         if(empty($request->warehouse_id)) return response()->json([],200);
         $excepts = empty($request->excepts) ? [] : $request->excepts;
         $assets = Asset::where('warehouse_id',$request->warehouse_id)
@@ -99,4 +98,52 @@ class TransferController extends Controller
         return response()->json(['status'=>'true'],200);
     }
     /* Điều chuyển  kho (Kho vật lý) sang node */
+
+    /* Điều chuyển Node -> Kho (Kho vật lý) */
+
+    public function showFormNodeToWarehouse()
+    {
+        return view('local_transfers.node-to-warehouse');
+    }
+
+    public function transferNodeToWarehouse(Request $request)
+    {
+        $next_warehouse_id = $request->warehouse_id;
+        $assets = $request->assets;
+        foreach ($assets as $as){
+            $as = (object) $as;
+            $asset = Asset::find($as->id);
+            if($asset->origin_qty == 1){
+                $asset->warehouse_id = $next_warehouse_id;
+                $asset->save();
+            }else{
+                Asset::create([
+                    'serial'=>$asset->serial,
+                    'serial2'=>$asset->serial2,
+                    'serial3'=>$asset->serial3,
+                    'serial4'=>$asset->serial4,
+                    'origin'=>$asset->origin,
+                    'warranty_partner'=>$asset->warranty_partner,
+                    'warranty_period'=>$asset->warranty_period,
+                    'quantity'=> intval($as->quanity),
+                    'manager'=> $asset->manager,
+                    'asset_type_id'=>$asset->asset_type_id,
+                    'asset_position_id'=>$asset->asset_position_id,
+                    'warehouse_id'=>$next_warehouse_id,
+                    'asset_status_id'=>$asset->asset_status_id,
+                    'asset_qlts_code_id'=>$asset->asset_qlts_code_id,
+                    'asset_vhkt_code_id'=>$asset->asset_vhkt_code_id,
+                    'parent_id'=>$asset->id,
+                    'origin_qty'=>$asset->origin_qty,
+                    'note'=>$asset->note,
+                    'user_id'=>$asset->user_id,
+                    'group_id'=>$asset->group_id,
+                    'indexes'=>$asset->indexes,
+                ]);
+                $asset->quantity = intval($asset->quantity) - intval($as->quantity);
+                $asset->save();
+            }
+        }
+        return response()->json(['status'=>'true'],200);
+    }
 }

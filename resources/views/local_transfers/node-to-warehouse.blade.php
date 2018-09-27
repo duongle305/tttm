@@ -16,25 +16,24 @@
         </div>
 
         <form class="steps" action="#">
-            <h6>Chọn node đích</h6>
-            <fieldset>
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="form-group">
-                            <label for="node">Chọn node <span class="text-danger">*</span></label>
-                            <select id="node" data-placeholder="Chọn node..."></select>
-                        </div>
-                    </div>
-                </div>
-            </fieldset>
-
-            <h6>Chọn kho</h6>
+            <h6>Chọn kho đích</h6>
             <fieldset>
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="form-group">
                             <label for="warehouse">Chọn kho</label>
                             <select id="warehouse" data-placeholder="Chọn kho..."></select>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+            <h6>Chọn node</h6>
+            <fieldset>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <label for="node">Chọn node <span class="text-danger">*</span></label>
+                            <select id="node" data-placeholder="Chọn node..."></select>
                         </div>
                     </div>
                 </div>
@@ -133,26 +132,7 @@
             },
             onStepChanging: (e, currentIndex, nextIndex)=>{
                 switch (nextIndex) {
-                    case 1:{
-                        if(node.select2('data').length > 0) return true;
-                        else new PNotify({
-                                title: 'Thông báo',
-                                text: 'Vui lòng chọn node đích',
-                                addclass: 'bg-danger',
-                                type:'error'
-                            });
-                        break;
-                    }
-                    case 2:{
-                        if(warehouse.select2('data').length > 0) return true;
-                        else new PNotify({
-                            title: 'Thông báo',
-                            text: 'Vui lòng chọn node kho',
-                            addclass: 'bg-danger',
-                            type:'error'
-                        });
-                        break;
-                    }
+
                     case 3:{
                         if(excepts.length > 0){
                             viewDetail();
@@ -166,10 +146,10 @@
             },
             onFinishing: ()=>{
                 $.ajax({
-                    url:'{{ route('warehouse-to-node.submit') }}',
+                    url:'{{ route('node-to-warehouse.submit') }}',
                     method: 'POST',
                     headers: {'X-CSRF-Token': $('input[name="_token"]').attr('value')},
-                    data:{ node_id: node.select2('data')[0].id, assets: assetList},
+                    data:{ warehouse_id: warehouse.select2('data')[0].id, assets: assetList},
                 }).done((res)=>{
                     if(res.status) new PNotify({
                         title: 'Thông báo',
@@ -181,7 +161,7 @@
                 return true;
             },
             onFinished: function (event, currentIndex) {
-
+                $('a[href="#finish"]').hide();
             }
         });
 
@@ -194,7 +174,7 @@
         /* Node */
         node.select2({
             ajax:{
-                url:'{{ route('warehouse-to-node.nodes') }}',
+                url:'{{ route('node-to-warehouse.nodes') }}',
                 headers: {'X-CSRF-Token': $('input[name="_token"]').attr('value')},
                 type: 'POST',
                 dataType: 'json',
@@ -228,7 +208,7 @@
         });
         warehouse.select2({
             ajax:{
-                url:'{{ route('warehouse-to-node.warehouses') }}',
+                url:'{{ route('node-to-warehouse.warehouses') }}',
                 headers: {'X-CSRF-Token': $('input[name="_token"]').attr('value')},
                 type: 'POST',
                 dataType: 'json',
@@ -252,7 +232,7 @@
         });
         asset.select2({
             ajax: {
-                url: '{{ route('warehouse-to-node.assets') }}',
+                url: '{{ route('node-to-warehouse.assets') }}',
                 headers: {'X-CSRF-Token': $('input[name="_token"]').attr('value')},
                 type: 'POST',
                 dataType: 'json',
@@ -260,7 +240,7 @@
                     return {
                         keyword: prams.term,
                         excepts: excepts,
-                        warehouse_id: warehouse.select2('data')[0].id,
+                        warehouse_id: node.select2('data')[0].node.warehouse_id
                     };
                 },
                 processResults: function (data) {
@@ -322,11 +302,11 @@
         function viewDetail(){
             $('#table-transfer tbody').html(`
                                 <tr>
-                                    <th>Kho điều chuyển</th>
+                                    <th>Node điều chuyển</th>
                                     <td>${node.select2('data')[0].text}</td>
                                 </tr>
                                 <tr>
-                                    <th>Node đích</th>
+                                    <th>Kho đích</th>
                                     <td>${warehouse.select2('data')[0].text}</td>
                                 </tr>`);
             let index = 1, row = '';
