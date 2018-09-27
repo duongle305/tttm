@@ -22,4 +22,19 @@ class Asset extends Model
     public function vhktCode(){
         return $this->hasOne('App\AssetVhktCode','id');
     }
+
+    public function assetPosition(){
+        return $this->belongsTo('App\AssetPosition','asset_position_id','id');
+    }
+
+    public function isNextPositionPermit($nextPositionID){
+        $flag = false;
+        foreach (AssetNextPosition::where('current_id','=',$this->assetPosition()->first()->id)->get() as $case){
+            if($case->next_id == $nextPositionID){
+                $flag = true;
+                break;
+            }
+        }
+        return $flag;
+    }
 }

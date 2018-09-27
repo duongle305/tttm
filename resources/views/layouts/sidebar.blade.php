@@ -42,6 +42,7 @@
                             <li><a href="{{ route('local-warehouse-transfers.create') }}">Điều chuyển giữa các kho nội bộ</a></li>
                             <li><a href="{{ route('local-manager-transfers.create') }}">Điều chuyển giữa nhân viên quản lý</a></li>
                             <li><a href="{{ route('local-transfers.node-to-manager') }}">Điều chuyển giữa node và nhân viên quản lý</a></li>
+                            <li><a href="{{ route('local-transfers.warehouse-to-manager') }}">Điều chuyển giữa kho và nhân viên quản lý</a></li>
                         </ul>
                     </li>
                 </ul>

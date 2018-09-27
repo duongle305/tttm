@@ -36,6 +36,9 @@ Route::middleware('auth')->group(function(){
     Route::post('ajax/node-to-manager/get-node','LocalTransferController@getNodeAfterManagerSelected')->name('local-transfers.node-to-manager.get-node');
     Route::post('ajax/node-to-manager/submit','LocalTransferController@nodeToManagerSubmit')->name('local-transfers.node-to-manager.submit');
 
+
+    Route::get('transfer-warehouse-to-manager','LocalTransferController@warehouseToManager')->name('local-transfers.warehouse-to-manager');
+    Route::post('ajax/transfer-warehouse-to-manager/get-warehouse','LocalTransferController@getWarehouseAfterManagerSelected')->name('local-transfers.warehouse-to-manager.get-warehouse');
     //repository transfers
     Route::get('ware-house-transfers','LocalTransferController@wareHouseTransfers')->name('local-warehouse-transfers.create');
     Route::post('ajax/warehouses','LocalTransferController@getWareHouseTransfers')->name('local-transfers.warehouses');

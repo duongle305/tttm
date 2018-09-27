@@ -15,32 +15,29 @@
 @section('content')
     <div class="panel panel-white">
         <div class="panel-heading">
-            <h5 class="panel-title">ĐIỀU CHUYỂN GIỮA CÁC NODE NỘI BỘ</h5>
+            <h5 class="panel-title">ĐIỀU CHUYỂN GIỮA CÁC KHO VÀ NVQL</h5>
         </div>
 
         <form class="steps-validation" action="#">
-            <h6>Chọn Node đích</h6>
+            <h6>Chọn nhân viên</h6>
             <fieldset>
                 <div class="row mb-10">
                     <div class="col-md-12">
                         <h4 class="text-center"><b>Bước 1:</b></h4>
-                        <h6 class="grey-300 text-center">Chọn Node để chuyển tài sản vào</h6>
+                        <h6 class="grey-300 text-center">Chọn nhân viên muốn chuyển tài sản cần quản lý sang</h6>
                         <div class="form-group">
-                            <label class="col-lg-1 control-label">Node<span class="text-danger">*</span></label>
+                            <label class="col-lg-1 control-label">Nhân viên<span class="text-danger">*</span></label>
                             <div class="col-lg-11">
-                                <select data-placeholder="Chọn node..." class="select"
+                                <select data-placeholder="Chọn nhân viên..." class="select"
                                         id="step_1_select"></select>
                                 <div id="step1_error_show"></div>
-                                <h6 class="grey-300 text-center mt-10">Danh sách hiển thị là các node đã liên kết với
-                                    kho dành riêng cho mỗi node. nếu không tìm thấy hãy qua <code>Quản lý node</code> để
-                                    liên kết kho</h6>
                             </div>
                         </div>
                     </div>
                 </div>
             </fieldset>
 
-            <h6>Chọn Node đầu</h6>
+            <h6>Chọn Kho có tài sản cần chuyển</h6>
             <fieldset>
                 <div class="row mb-10">
                     <div class="col-md-12">
@@ -53,9 +50,6 @@
                                     <option></option>
                                 </select>
                                 <div id="step2_error_show"></div>
-                                <h6 class="grey-300 text-center mt-10">Danh sách hiển thị là các node đã liên kết với
-                                    kho dành riêng cho mỗi node. nếu không tìm thấy hãy qua <code>Quản lý node</code> để
-                                    liên kết kho</h6>
                             </div>
                         </div>
                     </div>
@@ -125,7 +119,23 @@
                         <h4 class="text-center"><b>Bước 4:</b></h4>
                         <h6 class="grey-300 text-center">Xem lại và kết thúc</h6>
                         <div class="row">
-                            <label>Node đầu:</label>
+                            <label>Nhân viên:</label>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped">
+                                    <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Tên nhân viên</th>
+                                        <th>Email</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="step4_show_manager">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row mt-20">
+                            <label>Node có tài sản cần chuyển:</label>
                             <div class="table-responsive">
                                 <table class="table table-bordered table-striped">
                                     <thead>
@@ -138,33 +148,13 @@
                                         <th>Phòng máy</th>
                                     </tr>
                                     </thead>
-                                    <tbody id="step4_show_node_transfer">
+                                    <tbody id="step4_show_node">
 
                                     </tbody>
                                 </table>
                             </div>
                         </div>
-                        <div class="row">
-                            <label>Node đích:</label>
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-striped">
-                                    <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Tên node</th>
-                                        <th>Mã</th>
-                                        <th>Tên viết tắt</th>
-                                        <th>NIMS</th>
-                                        <th>Phòng máy</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody id="step4_show_node_destination">
-
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="row">
+                        <div class="row mt-20">
                             <label>Tài sản:</label>
                             <div class="table-responsive">
                                 <table class="table table-bordered table-striped">
@@ -196,7 +186,7 @@
             var step2Status = false;
             var step3Status = false;
             var node_transfer = null;
-            var node_destination = null;
+            var manager = null;
             var assets_selected = [];
             var tmp = null;
 
@@ -213,15 +203,15 @@
                         return true;
                     }
 
-                    if(currentIndex == 0 && !node_destination){
-                        $('#step1_error_show').html('<label class="validation-error-label">Bạn chưa chọn node đích</label>');
+                    if(currentIndex == 0 && !manager){
+                        $('#step1_error_show').html('<label class="validation-error-label">Bạn chưa chọn nhân viên</label>');
                         return false;
                     }
                     if(currentIndex == 0 && !step1Status){
                         return false;
                     }
                     if(currentIndex == 1 && !node_transfer){
-                        $('#step2_error_show').html('<label class="validation-error-label">Bạn chưa chọn node đầu</label>');
+                        $('#step2_error_show').html('<label class="validation-error-label">Bạn chưa chọn node</label>');
                         return false;
                     }
                     if(currentIndex == 1 && !step2Status){
@@ -250,13 +240,15 @@
                 },
 
                 onFinished: function (event, currentIndex) {
+
                     $.ajax({
                         headers: {'X-CSRF-Token': $('input[name="_token"]').attr('value')},
-                        url: "/ajax/node-to-node",
+                        url: "/ajax/node-to-manager/submit",
                         method: "POST",
                         dataType: 'json',
                         data: {
-                            node_destination: node_destination,
+                            manager: manager,
+                            node_transfer: node_transfer,
                             assets: assets_selected
                         },
                         success: function (data) {
@@ -332,20 +324,20 @@
             $('#step_1_select').select2({
                 minimumInputLength: 1,
                 ajax: {
-                    url: '/ajax/nodes',
+                    url: '/manager-transfers/managers',
                     headers: {'X-CSRF-Token': $('input[name="_token"]').attr('value')},
                     type: 'POST',
                     dataType: 'json',
                     data: function (params) {
                         return {
-                            keyWord: params.term
+                            keyword: params.term
                         };
                     },
                     processResults: function (data, params) {
                         return {
                             results: $.map(data, function (item) {
                                 return {
-                                    text: `Tên: ${item.name} |-Quản lý: ${item.manager} |- ${item.room_name}`,
+                                    text: `Tên nhân viên: ${item.username} |-Email: ${item.email}`,
                                     id: item.id,
                                     data: item
                                 };
@@ -357,17 +349,17 @@
 
             $('#step_1_select').on('select2:select', (e) => {
                 if (e.params.data.data.warehouse_id == null) {
-                    $.jGrowl('Hệ thống đang bị lỗi rất nghiêm trọng, vui lòng liên hệ System admin để biết chi tiết', {
+                    $.jGrowl('Nhân viên đã chọn không có liên kết với kho nào, liên hệ System admin để biết chi tiết', {
                         header: 'Nguy hiểm!',
                         theme: 'bg-danger'
                     });
                     $('#step1_error_show').html('');
                     $('#step_1_select').val(null).trigger('change');
-                    node_destination = null;
+                    manager = null;
                     step1Status = false;
                 } else {
-                    node_destination = e.params.data.data;
-                    step4ShowNode(node_destination, $('#step4_show_node_destination'));
+                    manager = e.params.data.data;
+                    step4ShowManager(manager, $('#step4_show_manager'));
                     $('#step1_error_show').html('');
                     step1Status = true;
                 }
@@ -376,13 +368,13 @@
             $('#step_2_select').select2({
                 minimumInputLength: 1,
                 ajax: {
-                    url: '/ajax/nodes',
+                    url: '/ajax/transfer-warehouse-to-manager/get-warehouse',
                     headers: {'X-CSRF-Token': $('input[name="_token"]').attr('value')},
                     type: 'POST',
                     dataType: 'json',
                     data: function (params) {
                         return {
-                            step1_node: node_destination,
+                            manager: manager,
                             keyWord: params.term
                         };
                     },
@@ -390,7 +382,7 @@
                         return {
                             results: $.map(data, function (item) {
                                 if (item != null) return {
-                                    text: `Tên: ${item.name} |-Quản lý: ${item.manager} |- ${item.room_name}`,
+                                    text: `Tên: ${item.name} |- ${item.room_name}`,
                                     id: item.id,
                                     data: item
                                 };
@@ -402,7 +394,7 @@
 
             $('#step_2_select').on('select2:select', (e) => {
                 if (e.params.data.data.warehouse_id == null) {
-                    $.jGrowl('Hệ thống đang bị lỗi rất nghiêm trọng, vui lòng liên hệ System admin để biết chi tiết', {
+                    $.jGrowl('Node đã chon không có liên kết với kho nào, liên hệ System admin để biết chi tiết', {
                         header: 'Nguy hiểm!',
                         theme: 'bg-danger'
                     });
@@ -413,7 +405,7 @@
                 } else {
                     step2Status = true;
                     node_transfer = e.params.data.data;
-                    step4ShowNode(node_transfer, $('#step4_show_node_transfer'));
+                    step4ShowNode(node_transfer, $('#step4_show_node'));
                     $('#step2_error_show').html('');
                 }
             });
@@ -429,7 +421,8 @@
                         return {
                             node: node_transfer,
                             keyWord: params.term,
-                            asset_position_id: '3'
+                            asset_position_id: '3',
+                            selected: assets_selected
                         }
                     },
                     processResults: function (data, params) {
@@ -519,10 +512,19 @@
             function step3ShowSelected() {
                 let html = "";
                 assets_selected.forEach((data) => {
-                        html += `- Số lượng điều chuyển: ${data.transfer_quantity} // ${data.asset_name} |-Số lượng hiện có: ${data.quantity} |-Kho: ${data.warehouse_name} |-Vendor: ${data.vendor_name} |-Mã QLTS: ${data.qlts_code} |-Mã VHKT: ${data.vhkt_code}\n`;
+                    html += `- Số lượng điều chuyển: ${data.transfer_quantity} // ${data.asset_name} |-Số lượng hiện có: ${data.quantity} |-Kho: ${data.warehouse_name} |-Vendor: ${data.vendor_name} |-Mã QLTS: ${data.qlts_code} |-Mã VHKT: ${data.vhkt_code}\n`;
                 });
                 $('#list_assets_selected').val(html);
                 $('#step_3_select').val(null).trigger('change');
+            }
+
+            function step4ShowManager(manager, elelement) {
+                let html = `<tr>
+                            <td>${manager.id}</td>
+                            <td>${manager.username}</td>
+                            <td>${(manager.email == null) ? '' : manager.email}</td>
+                        </tr>`;
+                $(elelement).html(html);
             }
 
             function step4ShowNode(node, elelement) {
@@ -534,7 +536,6 @@
                             <td>${(node.nims == null) ? '' : node.nims}</td>
                             <td>${(node.room_name == null) ? '' : node.room_name}</td>
                         </tr>`;
-
                 $(elelement).html(html);
             }
         });

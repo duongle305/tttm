@@ -27,16 +27,22 @@ class LocalTransferController extends Controller
 
     public function getNodes(Request $request)
     {
-        $nodes = DB::table('nodes')
-            ->leftJoin('rooms','nodes.room_id','=','rooms.id')
-            ->where('nodes.name', 'like', "%$request->keyWord%")
-            ->select(['nodes.id as id', 'nodes.name', 'nodes.manager', 'nodes.warehouse_id','nodes.code','nodes.shortname','nodes.nims','nodes.zone','rooms.name as room_name'])
-            ->get();
-        if(!empty($request->step1_item_id)){
-            $nodes = collect($nodes)->map(function($item) use ($request){
-                if($item->id == $request->step1_item_id) unset($item);
-                else return $item;
-            })->all();
+        if(!empty($request->step1_node)){
+            $nodes = DB::table('nodes')
+                ->leftJoin('rooms','nodes.room_id','=','rooms.id')
+                ->where(function ($query) use($request){
+                    $query->where('nodes.name', 'like', "%$request->keyWord%")
+                        ->where('nodes.warehouse_id','=',$request->step1_node['warehouse_id'])
+                        ->where('nodes.id','!=',$request->step1_node['id']);
+                })
+                ->select(['nodes.id as id', 'nodes.name', 'nodes.manager', 'nodes.warehouse_id','nodes.code','nodes.shortname','nodes.nims','nodes.zone','rooms.name as room_name'])
+                ->get();
+        } else {
+            $nodes = DB::table('nodes')
+                ->leftJoin('rooms', 'nodes.room_id', '=', 'rooms.id')
+                ->where('nodes.name', 'like', "%$request->keyWord%")
+                ->select(['nodes.id as id', 'nodes.name', 'nodes.manager', 'nodes.warehouse_id', 'nodes.code', 'nodes.shortname', 'nodes.nims', 'nodes.zone', 'rooms.name as room_name'])
+                ->get();
         }
         return response()->json($nodes, 200);
     }
@@ -76,6 +82,7 @@ class LocalTransferController extends Controller
     }
 
     public function nodeToNode(Request $request){
+        $flag = false;
         $warehouse = Node::find($request->node_destination['id'])->warehouse;
         $assets = $request->assets;
         foreach ($assets as $asset){
@@ -278,6 +285,14 @@ class LocalTransferController extends Controller
         }
 
         return response()->json('ok',200);
+
+    }
+
+    public function warehouseToManager(){
+        return view('local_transfers.warehouse-to-manager');
+    }
+
+    public function getWarehouseAfterManagerSelected(Request $request){
 
     }
 }
