@@ -18,12 +18,7 @@ class LocalTransferController extends Controller
     // Điều chuyển node nội bộ
     public function index()
     {
-<<<<<<< HEAD
-
         return view('local_transfers.node-to-node');
-=======
-        return view('local_transfers.index');
->>>>>>> c4b7ce2440c1cf5e1d8292637da43d6ccd4708b0
     }
 
     public function getNodes(Request $request)
@@ -131,53 +126,6 @@ class LocalTransferController extends Controller
     }
     // Điều chuyển node nội bộ
 
-<<<<<<< HEAD
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function wareHouseTransfers()
-    {
-        return view('local_transfers.warehouse');
-    }
-
-    public function getWareHouseTransfers(Request $request){
-        $wareHouses = WareHouse::where('name','like',"%$request->keyword%")
-            ->select(['id','name','code','parent_text'])
-            ->get();
-        if(!empty($request->prevStepId)){
-            $wareHouses = collect($wareHouses)->map(function($item) use($request){
-                if($request->prevStepId === $item->id) {
-                    unset($item);
-                }else return $item;
-            })->all();
-        }
-        return response()->json($wareHouses,200);
-    }
-
-    public function getAssetByWareHouseId(Request $request){
-        if($request->warehouse_id == null) return [];
-        $excepts = collect($request->excepts)->map(function($item){ return $item['id']; });
-        $assets = Asset::where('warehouse_id',$request->warehouse_id)
-            ->with(['qltsCode'])
-            ->get();
-        $assets = collect($assets)->mapWithKeys(function($item){
-            $item->name = $item->qltsCode->name;
-            return [$item->id => $item];
-        })->except($excepts)->all();
-        return response()->json($assets, 200);
-    }
-
-    public function checkQuantity(Request $request)
-    {
-        $asset = Asset::find($request->id);
-        if(!$asset)  return response()->json(['message'=>'Data not found !'],400);
-        if($request->quantity > $asset->quantity) return response()->json(['status'=>false,'message'=>'Số lượng chuyển đi không được lớn hơn số lượng hiện có'],200);
-        return response()->json(['status'=>true],200);
-    }
-=======
->>>>>>> c4b7ce2440c1cf5e1d8292637da43d6ccd4708b0
 
     // Điều chuyển NVQL nội bộ
     public function getManagers(Request $request)
@@ -261,7 +209,6 @@ class LocalTransferController extends Controller
         return response()->json('ok',200);
     }
 
-
     public function showAssetTempTransfers()
     {
         return view('local_transfers.asset-temp-transfers')->with(compact('assets'));
@@ -313,7 +260,6 @@ class LocalTransferController extends Controller
     public function getCurrentUser(){
         return response()->json(Auth::user(),200);
     }
-
     public function warehouseToManagerSubmit(Request $request){
         $warehouse = $request->warehouse;
         $assets = $request->assets;
