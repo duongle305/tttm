@@ -80,7 +80,7 @@ class LocalTransferController extends Controller
 
     public function nodeToNode(Request $request){
         $flag = true;
-        $warehouse = Node::find($request->node_destination['id'])->warehouse;
+        $warehouse = Node::find($request->node_destination['id'])->first()->warehouse;
         $assets = $request->assets;
         foreach ($assets as $asset){
             $tmpAsset = Asset::find($asset['id']);
@@ -276,6 +276,98 @@ class LocalTransferController extends Controller
         }
 
         return ($flag) ? response()->json('ok',200) : response()->json('failed',401);
+    }
+
+
+    //Điều chuyển Kho nội bộ -> Kho nội bộ
+
+    public function warehouseToWarehouse(){
+        return view('local_transfers.warehouse-to-warehouse');
+    }
+
+    public function getWarehouseAfterWarehouseSelected(Request $request){
+        $parentWarehouse = WareHouse::find($request->warehouseDestination['parent_id']);
+
+        $warehouses = DB::table('warehouses')
+            ->where(function ($query) use ($request,$parentWarehouse){
+                $query->where('name','like',"%$request->keyWord%")
+                ->where('parent_id','=',$parentWarehouse->id)
+                ->where('id','!=',$request->warehouseDestination['id']);
+            })->get();
+
+        return response()->json($warehouses,200);
+    }
+
+    public function getAssetByWarehouse(Request $request){
+        $assets = DB::table('assets')
+            ->leftJoin('asset_qlts_codes','assets.asset_qlts_code_id','=','asset_qlts_codes.id')
+            ->leftJoin('asset_vhkt_codes','assets.asset_vhkt_code_id','=','asset_vhkt_codes.id')
+            ->leftJoin('warehouses','assets.warehouse_id','=','warehouses.id')
+            ->leftJoin('vendors','vendors.id','=','asset_qlts_codes.vendor_id')
+            ->where(function ($query) use($request) {
+                $query->where('asset_qlts_codes.name', 'like', "%$request->keyWord%")
+                    ->where('warehouse_id', '=', $request->warehouseTransfer['id'])
+                    ->whereNotIn('assets.id',function($query) {
+                        $query->select('asset_id')->from('asset_temp_transfers');
+                    });
+            })->select(['assets.id as id','quantity','origin_qty','asset_qlts_codes.name as asset_name','warehouses.name as warehouse_name','warehouses.id as warehouse_id','asset_qlts_codes.code as qlts_code','asset_vhkt_codes.code as vhkt_code','vendors.name as vendor_name'])
+            ->get();
+        if(!empty($request->selected)){
+            $assets = $assets->map(function ($asset) use ($request){
+                $flag = false;
+                foreach ($request->selected as $select){
+                    if($select['id'] == $asset->id) {
+                        $flag = true;
+                        break;
+                    }
+                }
+                if($flag) return null;
+                return $asset;
+            });
+        }
+        return response()->json($assets,200);
+    }
+
+    public function warehouseToWarehouseSubmit(Request $request){
+        $flag = true;
+        $warehouse = $request->warehouseDestination;
+        $assets = $request->assets;
+
+        foreach ($assets as $asset){
+            $tmpAsset = Asset::find($asset['id']);
+            if($asset['transfer_quantity'] > 1){
+                $childAsset = Asset::insert([
+                    'serial' => $tmpAsset->serial,
+                    'serial2' => $tmpAsset->serial2,
+                    'serial3' => $tmpAsset->serial3,
+                    'serial4' => $tmpAsset->serial4,
+                    'quantity' => $asset['transfer_quantity'],
+                    'parent_id' => $tmpAsset->id,
+                    'origin' => $tmpAsset->origin,
+                    'warranty_partner' => $tmpAsset->warranty_partner,
+                    'warranty_period' => $tmpAsset->warranty_period,
+                    'manager' => $tmpAsset->manager,
+                    'asset_type_id' => $tmpAsset->asset_type_id,
+                    'asset_position_id' => $tmpAsset->asset_position_id,
+                    'warehouse_id' => $warehouse->id,
+                    'asset_status_id' => $tmpAsset->asset_status_id,
+                    'asset_qlts_code_id' => $tmpAsset->asset_qlts_code_id,
+                    'asset_vhkt_code_id' => $tmpAsset->asset_vhkt_code_id,
+                    'origin_qty' => $tmpAsset->origin_qty,
+                    'note' => $tmpAsset->note,
+                    'user_id' => $tmpAsset->user_id,
+                    'group_id' => $tmpAsset->group_id,
+                    'indexes' => $tmpAsset->indexes
+                ]);
+
+                $tmpAsset->quantity = (int)$tmpAsset->quantity - (int)$asset['transfer_quantity'];
+                $tmpAsset->save();
+            } else {
+                $tmpAsset->warehouse_id = $warehouse['id'];
+                $tmpAsset->save();
+            }
+        }
+        return ($flag) ? response()->json('ok',200) : response()->json('failed',403);
     }
 
     /* Danh sách tài sản điều chuyển chờ nhận */
