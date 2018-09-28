@@ -148,8 +148,6 @@ class TransferController extends Controller
     }
 
 
-
-<<<<<<< HEAD
     //transfer out of station
 
     public function transferOutOfStation(){
@@ -188,13 +186,14 @@ class TransferController extends Controller
         return response()->json($assets,200);
     }
 
-    public function transferOutOfStationSubmit(Request $request){
+    public function transferOutOfStationSubmit(Request $request)
+    {
         $flag = false;
         $assets = $request->assets;
-        foreach ($assets as $asset){
+        foreach ($assets as $asset) {
             $tmpAsset = Asset::find($asset['id']);
-            if(!$tmpAsset->first()) break;
-            if($asset['transfer_quantity'] > 1){
+            if (!$tmpAsset->first()) break;
+            if ($asset['transfer_quantity'] > 1) {
                 Asset::insert([
                     'serial' => $tmpAsset->serial,
                     'serial2' => $tmpAsset->serial2,
@@ -232,8 +231,8 @@ class TransferController extends Controller
             }
         }
 
-        return (!$flag) ? response()->json('failed',403) : response()->json('ok',200);
-=======
+        return (!$flag) ? response()->json('failed', 403) : response()->json('ok', 200);
+    }
 
     /* Transfer Warranty repairs */
 
@@ -258,6 +257,5 @@ class TransferController extends Controller
                 'vendors.name as vendor_name'
             )->get();
         return response()->json($asset, 200);
->>>>>>> 449e333f078bd64d624f4a7502f4724905d79415
     }
 }

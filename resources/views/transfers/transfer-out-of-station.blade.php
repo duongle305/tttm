@@ -55,13 +55,15 @@
                         <div class="row">
                             <div class="form-group mt-20">
                                 <div class="col-md-12">
-                                    <label>Các tài sản sẽ chuyển</label>
+                                    <label class="ml-10">Các tài sản sẽ chuyển</label>
                                     <div class="table-responsive">
                                         <table class="table table-striped">
                                             <thead>
                                             </thead>
                                             <tbody id="step1_show_selected">
-
+                                            <tr>
+                                                <td>Không có tài sản nào</td>
+                                            </tr>
                                             </tbody>
                                         </table>
                                     </div>

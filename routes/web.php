@@ -86,7 +86,6 @@ Route::middleware('auth')->group(function(){
     });
     //transfer manager to manager
 
-<<<<<<< HEAD
 
     //transfer out of station
 
@@ -94,12 +93,12 @@ Route::middleware('auth')->group(function(){
         Route::get('/','TransferController@transferOutOfStation')->name('transfer-out-of-station.index');
         Route::post('/ajax/get-asset','TransferController@selectAsset');
         Route::post('/ajax/submit','TransferController@transferOutOfStationSubmit');
-=======
+    });
+
     // transfer repairs
     Route::prefix('warranty-repairs')->group(function(){
         Route::get('create','TransferController@showFormWarrantyRepair')->name('warranty-repairs.create');
         Route::post('assets','TransferController@getAssetTransferWarrantyRepair')->name('warranty-repairs.assets');
->>>>>>> 449e333f078bd64d624f4a7502f4724905d79415
     });
 
 
