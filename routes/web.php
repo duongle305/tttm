@@ -44,7 +44,14 @@ Route::middleware('auth')->group(function(){
     Route::post('ajax/transfer-warehouse-to-manager/submit','LocalTransferController@warehouseToManagerSubmit')->name('local-transfers.warehouse-to-manager.submit');
 
 
-
+    //transfer warehouse to warehouse
+    Route::prefix('transfer-warehouse-to-warehouse')->group(function (){
+        Route::get('','LocalTransferController@warehouseToWarehouse')->name('local-transfers.warehouse-to-warehouse');
+        Route::post('ajax/get-warehouse','LocalTransferController@getWarehouse');
+        Route::post('ajax/get-warehouse-after-warehouse-selected','LocalTransferController@getWarehouseAfterWarehouseSelected');
+        Route::post('ajax/get-asset-after-warehouse-selected','LocalTransferController@getAssetByWarehouse');
+        Route::post('ajax/submit','LocalTransferController@warehouseToWarehouseSubmit');
+    });
 
     //transfer warehouse to node
     Route::prefix('warehouse-to-node')->group(function(){
