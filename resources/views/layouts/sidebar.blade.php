@@ -51,6 +51,7 @@
                         <ul>
                             <li><a href="{{ route('warehouse-to-node.create') }}">Kho sang node</a></li>
                             <li><a href="{{ route('node-to-warehouse.create') }}">Node sang kho</a></li>
+                            <li><a href="{{ route('transfer-out-of-station.index') }}">Chuyển ra khỏi trạm</a></li>
                         </ul>
                     </li>
                 </ul>

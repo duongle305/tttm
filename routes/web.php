@@ -84,6 +84,13 @@ Route::middleware('auth')->group(function(){
     //transfer manager to manager
 
 
+    //transfer out of station
+
+    Route::prefix('transfer-out-of-station')->group(function (){
+        Route::get('/','TransferController@transferOutOfStation')->name('transfer-out-of-station.index');
+        Route::post('/ajax/get-asset','TransferController@selectAsset');
+        Route::post('/ajax/submit','TransferController@transferOutOfStationSubmit');
+    });
 
 
     Route::get('users', 'ChangeRegisterController@users')->name('cr.users');
