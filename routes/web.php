@@ -54,6 +54,9 @@ Route::middleware('auth')->group(function(){
         Route::post('assets','TransferController@getAssets')->name('warehouse-to-node.assets');
         Route::post('submit','TransferController@transferWarehouseToNode')->name('warehouse-to-node.submit');
     });
+    //transfer warehouse to node
+
+    /* transfer node to warehouse */
     Route::prefix('node-to-warehouse')->group(function(){
         Route::get('create','TransferController@showFormNodeToWarehouse')->name('node-to-warehouse.create');
         Route::post('nodes','TransferController@getNodes')->name('node-to-warehouse.nodes');
@@ -61,7 +64,7 @@ Route::middleware('auth')->group(function(){
         Route::post('assets','TransferController@getAssets')->name('node-to-warehouse.assets');
         Route::post('submit','TransferController@transferNodeToWarehouse')->name('node-to-warehouse.submit');
     });
-    //transfer warehouse to node
+    /* transfer node to warehouse */
 
     //transfer manager to manager
     Route::prefix('manager-transfers')->group(function(){
@@ -76,7 +79,11 @@ Route::middleware('auth')->group(function(){
     });
     //transfer manager to manager
 
-
+    // transfer repairs
+    Route::prefix('warranty-repairs')->group(function(){
+        Route::get('create','TransferController@showFormWarrantyRepair')->name('warranty-repairs.create');
+        Route::post('assets','TransferController@getAssetTransferWarrantyRepair')->name('warranty-repairs.assets');
+    });
 
 
     Route::get('users', 'ChangeRegisterController@users')->name('cr.users');

@@ -50,6 +50,7 @@
                         <ul>
                             <li><a href="{{ route('warehouse-to-node.create') }}">Kho sang node</a></li>
                             <li><a href="{{ route('node-to-warehouse.create') }}">Node sang kho</a></li>
+                            <li><a href="{{ route('warranty-repairs.create') }}">Bảo hành sửa chữa</a></li>
                         </ul>
                     </li>
                 </ul>
