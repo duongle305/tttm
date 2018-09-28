@@ -239,25 +239,33 @@
                     dataType: 'json',
                     data: function (params) {
                         if(assets_selected.length >0){
-                            return {
+                            var query = {
                                 selected: assets_selected,
                                 keyWord: params.term,
-                            }
+                                page: params.page || 1
+                            };
+                            return query;
                         } else {
-                            return {
+                            var query = {
                                 keyWord: params.term,
-                            }
+                                page: params.page || 1
+                            };
+                            return query;
                         }
                     },
                     processResults: function (data, params) {
+                        params.page = params.page || 1;
                         return {
-                            results: $.map(data, function (item) {
+                            results: $.map(data.data, function (item) {
                                 if (item != null) return {
                                     text: `Tên: ${item.asset_name} |-Số lượng hiện có: ${item.quantity} |-Kho: ${item.warehouse_name} |-Vendor: ${item.vendor_name} |-Mã QLTS: ${item.qlts_code} |-Mã VHKT: ${item.vhkt_code}`,
                                     id: item.id,
                                     data: item
                                 };
-                            })
+                            }),
+                            pagination: {
+                                more: (params.page * 10) <= data.total
+                            }
                         };
                     }
                 }

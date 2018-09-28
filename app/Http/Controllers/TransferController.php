@@ -155,33 +155,39 @@ class TransferController extends Controller
     }
 
     public function selectAsset(Request $request){
-        $assets = DB::table('assets')
-            ->leftJoin('asset_qlts_codes','assets.asset_qlts_code_id','=','asset_qlts_codes.id')
-            ->leftJoin('asset_vhkt_codes','assets.asset_vhkt_code_id','=','asset_vhkt_codes.id')
-            ->leftJoin('warehouses','assets.warehouse_id','=','warehouses.id')
-            ->leftJoin('vendors','asset_qlts_codes.vendor_id','=','vendors.id')
-            ->where(function ($query) use($request){
-                $query->where('asset_qlts_codes.name','like',"%$request->keyWord%")
-                    ->where(function ($query2){
-                        $query2->where('assets.asset_position_id','=','3')
-                            ->orWhere('assets.asset_position_id','=','5');
-                    });
-            })->select(['assets.id as id','quantity','origin_qty','asset_qlts_codes.name as asset_name','warehouses.name as warehouse_name','warehouses.id as warehouse_id','asset_qlts_codes.code as qlts_code','asset_vhkt_codes.code as vhkt_code','vendors.name as vendor_name'])
-            ->get();
 
         if(!empty($request->selected)){
-            $assets = $assets->map(function ($asset) use ($request){
-                $flag = false;
-                foreach ($request->selected as $select){
-                    if($select['id'] == $asset->id)
-                    {
-                        $flag = true;
-                        break;
-                    }
-                }
-                if($flag) return null;
-                return $asset;
-            });
+            $selected = collect($request->selected)->map(function ($item){
+                return $item['id'];
+            })->toArray();
+            $assets = DB::table('assets')
+                ->leftJoin('asset_qlts_codes','assets.asset_qlts_code_id','=','asset_qlts_codes.id')
+                ->leftJoin('asset_vhkt_codes','assets.asset_vhkt_code_id','=','asset_vhkt_codes.id')
+                ->leftJoin('warehouses','assets.warehouse_id','=','warehouses.id')
+                ->leftJoin('vendors','asset_qlts_codes.vendor_id','=','vendors.id')
+                ->where(function ($query) use($request,$selected){
+                    $query->where('asset_qlts_codes.name','like',"%$request->keyWord%")
+                        ->whereNotIn('assets.id',$selected)
+                        ->where(function ($query2){
+                            $query2->where('assets.asset_position_id','=','3')
+                                ->orWhere('assets.asset_position_id','=','5');
+                        });
+                })->select(['assets.id as id','quantity','origin_qty','asset_qlts_codes.name as asset_name','warehouses.name as warehouse_name','warehouses.id as warehouse_id','asset_qlts_codes.code as qlts_code','asset_vhkt_codes.code as vhkt_code','vendors.name as vendor_name'])
+                ->paginate(10);
+        }else {
+            $assets = DB::table('assets')
+                ->leftJoin('asset_qlts_codes','assets.asset_qlts_code_id','=','asset_qlts_codes.id')
+                ->leftJoin('asset_vhkt_codes','assets.asset_vhkt_code_id','=','asset_vhkt_codes.id')
+                ->leftJoin('warehouses','assets.warehouse_id','=','warehouses.id')
+                ->leftJoin('vendors','asset_qlts_codes.vendor_id','=','vendors.id')
+                ->where(function ($query) use($request){
+                    $query->where('asset_qlts_codes.name','like',"%$request->keyWord%")
+                        ->where(function ($query2){
+                            $query2->where('assets.asset_position_id','=','3')
+                                ->orWhere('assets.asset_position_id','=','5');
+                        });
+                })->select(['assets.id as id','quantity','origin_qty','asset_qlts_codes.name as asset_name','warehouses.name as warehouse_name','warehouses.id as warehouse_id','asset_qlts_codes.code as qlts_code','asset_vhkt_codes.code as vhkt_code','vendors.name as vendor_name'])
+                ->paginate(10);
         }
         return response()->json($assets,200);
     }

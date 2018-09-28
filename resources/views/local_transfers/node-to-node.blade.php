@@ -110,7 +110,15 @@
                             <div class="form-group mt-20">
                                 <div class="col-md-12">
                                     <label>Các tài sản sẽ chuyển sang node mới</label>
-                                    <textarea rows="6" cols="5" class="form-control" readonly id="list_assets_selected"></textarea>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                            </thead>
+                                            <tbody id="list_assets_selected">
+
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -144,7 +152,7 @@
                                 </table>
                             </div>
                         </div>
-                        <div class="row">
+                        <div class="row mt-20">
                             <label>Node đích:</label>
                             <div class="table-responsive">
                                 <table class="table table-bordered table-striped">
@@ -164,7 +172,7 @@
                                 </table>
                             </div>
                         </div>
-                        <div class="row">
+                        <div class="row mt-20">
                             <label>Tài sản:</label>
                             <div class="table-responsive">
                                 <table class="table table-bordered table-striped">
@@ -436,10 +444,19 @@
                     type: 'POST',
                     dataType: 'json',
                     data: function (params) {
-                        return {
-                            node: node_transfer,
-                            keyWord: params.term,
-                            asset_position_id: '3'
+                        if(assets_selected.length > 0){
+                            return {
+                                node: node_transfer,
+                                keyWord: params.term,
+                                asset_position_id: '3',
+                                selected: assets_selected
+                            }
+                        } else {
+                            return {
+                                node: node_transfer,
+                                keyWord: params.term,
+                                asset_position_id: '3'
+                            }
                         }
                     },
                     processResults: function (data, params) {
@@ -503,8 +520,8 @@
                 step4ShowSelected();
             });
 
-            $('#step3_delete_select').click((event) => {
-                assets_selected.pop();
+            $(document).on('click','.step3_delete_select',(event) => {
+                assets_selected.splice($(event.target).data('index'),1);
                 step3ShowSelected();
                 step4ShowSelected();
                 $('#step3_add_select').attr('disabled', 'true')
@@ -528,10 +545,14 @@
 
             function step3ShowSelected() {
                 let html = "";
-                assets_selected.forEach((data) => {
-                        html += `- Số lượng điều chuyển: ${data.transfer_quantity} // ${data.asset_name} |-Số lượng hiện có: ${data.quantity} |-Kho: ${data.warehouse_name} |-Vendor: ${data.vendor_name} |-Mã QLTS: ${data.qlts_code} |-Mã VHKT: ${data.vhkt_code}\n`;
+                assets_selected.forEach((data,index) => {
+                        html += `
+                        <tr>
+                            <td>- Số lượng điều chuyển: ${data.transfer_quantity} // ${data.asset_name} |-Số lượng hiện có: ${data.quantity} |-Kho: ${data.warehouse_name} |-Vendor: ${data.vendor_name} |-Mã QLTS: ${data.qlts_code} |-Mã VHKT: ${data.vhkt_code}</td>
+                            <td><button type="button" class="btn btn-danger btn-xs step3_delete_select" data-index="${index}">Xóa</button></td>
+                        </tr>`;
                 });
-                $('#list_assets_selected').val(html);
+                $('#list_assets_selected').html(html);
                 $('#step_3_select').val(null).trigger('change');
             }
 
