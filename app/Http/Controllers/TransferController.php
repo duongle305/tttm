@@ -149,6 +149,7 @@ class TransferController extends Controller
 
 
 
+<<<<<<< HEAD
     //transfer out of station
 
     public function transferOutOfStation(){
@@ -232,5 +233,31 @@ class TransferController extends Controller
         }
 
         return (!$flag) ? response()->json('failed',403) : response()->json('ok',200);
+=======
+
+    /* Transfer Warranty repairs */
+
+    public function showFormWarrantyRepair()
+    {
+        return view('transfers.warranty-repairs');
+    }
+
+    public function getAssetTransferWarrantyRepair()
+    {
+        /* 2: Trên mạng lưới, 3: Trong kho, 5: Trực ca giữ làm nghiệp vụ */
+        $asset = DB::table('assets')->whereIn('asset_position_id',[2,3,5])
+            ->join('asset_qlts_codes','assets.asset_qlts_code_id','=','asset_qlts_codes.id')
+            ->join('vendors','asset_qlts_codes.vendor_id','=','vendors.id')
+            ->select(
+                'assets.id',
+                'assets.serial',
+                'assets.quantity',
+                'assets.origin_qty',
+                'asset_qlts_codes.name',
+                'asset_qlts_codes.code as qlts_code',
+                'vendors.name as vendor_name'
+            )->get();
+        return response()->json($asset, 200);
+>>>>>>> 449e333f078bd64d624f4a7502f4724905d79415
     }
 }

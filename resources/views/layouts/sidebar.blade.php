@@ -51,7 +51,11 @@
                         <ul>
                             <li><a href="{{ route('warehouse-to-node.create') }}">Kho sang node</a></li>
                             <li><a href="{{ route('node-to-warehouse.create') }}">Node sang kho</a></li>
+<<<<<<< HEAD
                             <li><a href="{{ route('transfer-out-of-station.index') }}">Chuyển ra khỏi trạm</a></li>
+=======
+                            <li><a href="{{ route('warranty-repairs.create') }}">Bảo hành sửa chữa</a></li>
+>>>>>>> 449e333f078bd64d624f4a7502f4724905d79415
                         </ul>
                     </li>
                 </ul>
