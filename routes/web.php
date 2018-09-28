@@ -99,6 +99,7 @@ Route::middleware('auth')->group(function(){
     Route::prefix('warranty-repairs')->group(function(){
         Route::get('create','TransferController@showFormWarrantyRepair')->name('warranty-repairs.create');
         Route::post('assets','TransferController@getAssetTransferWarrantyRepair')->name('warranty-repairs.assets');
+        Route::post('submit','TransferController@submitWarrantyRepair')->name('warranty-repairs.submit');
     });
 
 

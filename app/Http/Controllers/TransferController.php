@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Asset;
+use App\AssetWarrantyRepair;
 use App\Node;
 use App\WareHouse;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -247,9 +249,10 @@ class TransferController extends Controller
         return view('transfers.warranty-repairs');
     }
 
-    public function getAssetTransferWarrantyRepair()
+    public function getAssetTransferWarrantyRepair(Request $request)
     {
         /* 2: Trên mạng lưới, 3: Trong kho, 5: Trực ca giữ làm nghiệp vụ */
+        $excepts = empty($request->excepts) ? [] : $request->excepts;
         $asset = DB::table('assets')->whereIn('asset_position_id',[2,3,5])
             ->join('asset_qlts_codes','assets.asset_qlts_code_id','=','asset_qlts_codes.id')
             ->join('vendors','asset_qlts_codes.vendor_id','=','vendors.id')
@@ -261,7 +264,67 @@ class TransferController extends Controller
                 'asset_qlts_codes.name',
                 'asset_qlts_codes.code as qlts_code',
                 'vendors.name as vendor_name'
-            )->get();
+            )
+            ->whereNotIn('assets.id',$excepts)
+            ->paginate(10);
         return response()->json($asset, 200);
+    }
+
+    public function submitWarrantyRepair(Request $request)
+    {
+        $assets = $request->assets;
+        foreach ($assets as $as){
+            $as = (object) $as;
+            $tmpDate = new Carbon($as->brokenDate);
+            $as->brokenDate = $tmpDate->toDateString();
+            $asset = Asset::find($as->id);
+            if($asset->origin_qty == 1){
+                $asset->warehouse_id = 5;
+                $asset->asset_position_id = 4;
+                $asset->save();
+                AssetWarrantyRepair::create([
+                    'asset_id'=>$as->id,
+                    'broken_date'=> $tmpDate,
+                    'reason'=> $as->reason,
+                    'environment'=>$as->environment,
+                    'note'=> $as->note,
+                ]);
+            }else{
+                $tmp = Asset::create([
+                    'serial'=>$asset->serial,
+                    'serial2'=>$asset->serial2,
+                    'serial3'=>$asset->serial3,
+                    'serial4'=>$asset->serial4,
+                    'origin'=>$asset->origin,
+                    'warranty_partner'=>$asset->warranty_partner,
+                    'warranty_period'=>$asset->warranty_period,
+                    'quantity'=> intval($as->quantity),
+                    'manager'=> $asset->manager,
+                    'asset_type_id'=>$asset->asset_type_id,
+                    'asset_position_id'=> 4, // Đang bảo hành sửa chữa
+                    'warehouse_id'=> 5, // Kho bao hành sửa chữa
+                    'asset_status_id'=>$asset->asset_status_id,
+                    'asset_qlts_code_id'=>$asset->asset_qlts_code_id,
+                    'asset_vhkt_code_id'=>$asset->asset_vhkt_code_id,
+                    'parent_id'=>$asset->id,
+                    'origin_qty'=>$asset->origin_qty,
+                    'note'=>$asset->note,
+                    'user_id'=>$asset->user_id,
+                    'group_id'=>$asset->group_id,
+                    'indexes'=>$asset->indexes,
+                ]);
+                AssetWarrantyRepair::create([
+                    'asset_id'=>$tmp->id,
+                    'broken_date'=> $tmpDate,
+                    'reason'=> $as->reason,
+                    'environment'=>$as->environment,
+                    'note'=> $as->note,
+                ]);
+                $asset->quantity = intval($asset->quantity) - intval($as->quantity);
+                $asset->save();
+            }
+        }
+        session('message','Điều chuyển bảo hành sửa hữa thành công !');
+        return response()->json(['status'=>'true'],200);
     }
 }
